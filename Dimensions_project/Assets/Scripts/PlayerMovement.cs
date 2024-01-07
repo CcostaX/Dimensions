@@ -8,12 +8,15 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 moveDirection;
     private Animator animator;
+    private SpriteRenderer spriteRenderer;
+    private int previousDirection = -1;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -61,6 +64,16 @@ public class PlayerMovement : MonoBehaviour
 
             // Set the direction parameter in the Animator
             animator.SetInteger("direction", direction);
+
+            if (direction != previousDirection)
+            {
+                spriteRenderer.flipX = direction == 3 || direction == 4 || direction == 7 ;
+                previousDirection = direction;
+            }
+        }
+        else
+        {
+            animator.SetInteger("direction", -1);
         }
     }
 }
