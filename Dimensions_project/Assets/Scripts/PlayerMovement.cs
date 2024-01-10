@@ -11,6 +11,15 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private int previousDirection = -1;
 
+    //DASH
+    private bool canDash = true;
+    private bool isDashing = false;
+    private float dashingTime = 0.2f;
+    private float dashingPower = 24f;
+    private float dashingCooldown = 0.7f;
+
+    [SerializeField] private TrailRenderer tr;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,15 +37,29 @@ public class PlayerMovement : MonoBehaviour
     //physics calculations
     private void FixedUpdate()
     {
+        if (isDashing)
+        {
+            return;
+        }
+
         Move();
     }
 
     void ProcessInputs()
     {
+        if (isDashing)
+        {
+            return;
+        }
+
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
-
         moveDirection = new Vector2(moveX, moveY);
+
+        if (Input.GetKeyDown(KeyCode.X) && canDash)
+        {
+            StartCoroutine(Dash(moveDirection));
+        }
     }
 
     void Move()
@@ -75,5 +98,31 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetInteger("direction", -1);
         }
+    }
+
+    private IEnumerator Dash(Vector2 dashDirection)
+    {
+        canDash = false;
+        isDashing = true;
+
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+
+        // Normalize the dash direction to ensure consistent speed in all directions
+        dashDirection.Normalize();
+
+        // Set the velocity based on the dash direction and power
+        rb.velocity = dashDirection * dashingPower;
+
+        tr.emitting = true;
+
+        yield return new WaitForSeconds(dashingTime);
+
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
     }
 }
