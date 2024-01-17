@@ -120,24 +120,49 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Dash(Vector2 dashDirection)
     {
+
         canDash = false;
         isDashing = true;
 
-        float originalGravity = rb.gravityScale;
-        rb.gravityScale = 0f;
 
-        // Normalize the dash direction to ensure consistent speed in all directions
-        dashDirection.Normalize();
+        if (cameraView.isDimension2D)
+        {
+            rb = GetComponent<Rigidbody2D>();
+            float originalGravity = rb.gravityScale;
+            rb.gravityScale = 0f;
 
-        // Set the velocity based on the dash direction and power
-        rb.velocity = dashDirection * dashingPower;
+            // Normalize the dash direction to ensure consistent speed in all directions
+            dashDirection.Normalize();
 
-        tr.emitting = true;
+            // Set the velocity based on the dash direction and power
+            rb.velocity = dashDirection * dashingPower;
 
-        yield return new WaitForSeconds(dashingTime);
+            tr.emitting = true;
+
+            yield return new WaitForSeconds(dashingTime);
+
+            rb.gravityScale = originalGravity;
+        }
+        else
+        {
+            Rigidbody rb3D = GetComponent<Rigidbody>();
+            rb3D.useGravity = false;
+
+            // Normalize the dash direction to ensure consistent speed in all directions
+            dashDirection.Normalize();
+
+            // Set the velocity based on the dash direction and power
+            rb3D.velocity = dashDirection * dashingPower;
+
+            tr.emitting = true;
+
+            yield return new WaitForSeconds(dashingTime);
+
+            rb3D.useGravity = true;
+
+        }
 
         tr.emitting = false;
-        rb.gravityScale = originalGravity;
         isDashing = false;
 
         yield return new WaitForSeconds(dashingCooldown);
