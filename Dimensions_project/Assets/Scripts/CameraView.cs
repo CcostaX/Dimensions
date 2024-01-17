@@ -40,7 +40,7 @@ public class CameraView : MonoBehaviour
             transform.rotation = Quaternion.Euler(-45, transform.rotation.y, transform.rotation.z);
 
             GameObject player =  GameObject.FindGameObjectWithTag("Player");
-            Debug.Log(player);
+            player.GetComponent<PlayerMovement>().moveSpeed = 7f;
             StartCoroutine(ChangePlayerCollider(false, player));
         }
         else
@@ -51,7 +51,7 @@ public class CameraView : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, transform.rotation.y, transform.rotation.z);
 
             GameObject player = GameObject.FindGameObjectWithTag("Player");
-            Debug.Log(player);
+            player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(true, player));
         }
     }
@@ -73,6 +73,9 @@ public class CameraView : MonoBehaviour
             rigidbody2D.gravityScale = 0;
             rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
             isDimension2D = true;
+            player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z - 1);
+
+            ChangeObject3D(false);
         }
         else
         {
@@ -87,10 +90,38 @@ public class CameraView : MonoBehaviour
             collider.size = new Vector3(1f, 1f, 1f);
             Rigidbody rigidbody = player.AddComponent<Rigidbody>();
             rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
-            rigidbody.useGravity = false;
-
             isDimension2D = false;
+
+            ChangeObject3D(true);
+        }
+    }
+
+    private void ChangeObject3D(bool isPlayerDimension3D)
+    {
+        //Enable/Disable floor collision for 3D
+        GameObject[] floors = GameObject.FindGameObjectsWithTag("Floor");
+        foreach (GameObject floor in floors)
+        {
+            floor.GetComponent<BoxCollider>().enabled = isPlayerDimension3D;
         }
 
+        if (isPlayerDimension3D)
+        {
+            //Add Z scale to object3D
+            GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
+            foreach (GameObject object3D in objects3d)
+            {
+                object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
+            }
+        }
+        else
+        {
+            //Remove Z scale to object3D
+            GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
+            foreach (GameObject object3D in objects3d)
+            {
+                object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
+            }
+        }
     }
 }
