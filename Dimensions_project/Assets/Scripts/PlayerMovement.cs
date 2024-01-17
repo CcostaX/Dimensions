@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 0f;
     private Rigidbody2D rb;
     private Vector2 moveDirection;
+    private Vector3 moveDirection3D;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
     private int previousDirection = -1;
@@ -18,14 +19,16 @@ public class PlayerMovement : MonoBehaviour
     private float dashingPower = 24f;
     private float dashingCooldown = 0.5f;
 
+    public CameraView cameraView;
+
     [SerializeField] private TrailRenderer tr;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();    
+        cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
     }
 
     // Update is called once per frame
@@ -55,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         moveDirection = new Vector2(moveX, moveY);
+        moveDirection3D = new Vector3(moveX, moveY, 0);
 
         if (Input.GetKeyDown(KeyCode.X) && canDash)
         {
@@ -64,7 +68,19 @@ public class PlayerMovement : MonoBehaviour
 
     void Move()
     {
-        rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
+        if (cameraView.isDimension2D)
+        {
+            rb = GetComponent<Rigidbody2D>();
+            if (rb != null) 
+                rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
+        }
+        else
+        {
+            Rigidbody rb3D = GetComponent<Rigidbody>();
+            if (rb3D != null)
+                rb3D.velocity = new Vector3(moveDirection3D.x * moveSpeed, moveDirection3D.y * moveSpeed, moveDirection3D.z * moveSpeed);
+        }
+
     }
 
     private void OnAnimatorMove()
@@ -90,7 +106,9 @@ public class PlayerMovement : MonoBehaviour
 
             if (direction != previousDirection)
             {
-                spriteRenderer.flipX = direction == 3 || direction == 4 || direction == 7 ;
+                spriteRenderer = GetComponent<SpriteRenderer>();
+                spriteRenderer.flipX = direction == 3 || direction == 4 || direction == 7 ;             
+
                 previousDirection = direction;
             }
         }
