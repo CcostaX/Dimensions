@@ -40,7 +40,7 @@ public class CameraView : MonoBehaviour
             transform.rotation = Quaternion.Euler(-45, transform.rotation.y, transform.rotation.z);
 
             GameObject player =  GameObject.FindGameObjectWithTag("Player");
-            player.GetComponent<PlayerMovement>().moveSpeed = 7f;
+            player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(false, player));
         }
         else
@@ -89,6 +89,7 @@ public class CameraView : MonoBehaviour
             BoxCollider collider = player.AddComponent<BoxCollider>();
             collider.size = new Vector3(1f, 1f, 1f);
             Rigidbody rigidbody = player.AddComponent<Rigidbody>();
+            rigidbody.drag = 4;
             rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             isDimension2D = false;
 

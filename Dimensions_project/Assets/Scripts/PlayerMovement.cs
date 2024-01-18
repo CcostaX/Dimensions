@@ -13,6 +13,9 @@ public class PlayerMovement : MonoBehaviour
     private int previousDirection = -1;
 
     //DASH
+    private bool canJump = true;
+    public float jumpForce = -10;
+    public float dashJumpFriction = 10f;
     private bool canDash = true;
     private bool isDashing = false;
     private float dashingTime = 0.2f;
@@ -47,7 +50,6 @@ public class PlayerMovement : MonoBehaviour
 
         Move();
     }
-
     void ProcessInputs()
     {
         if (isDashing)
@@ -64,6 +66,11 @@ public class PlayerMovement : MonoBehaviour
         {
             StartCoroutine(Dash(moveDirection));
         }
+
+        if (Input.GetKeyDown(KeyCode.Z) && canJump)
+        {
+            StartCoroutine(Jump());
+        }
     }
 
     void Move()
@@ -78,7 +85,10 @@ public class PlayerMovement : MonoBehaviour
         {
             Rigidbody rb3D = GetComponent<Rigidbody>();
             if (rb3D != null)
-                rb3D.velocity = new Vector3(moveDirection3D.x * moveSpeed, moveDirection3D.y * moveSpeed, moveDirection3D.z * moveSpeed);
+            {
+                Vector3 normalizedDirection = moveDirection3D.normalized;
+                transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+            }
         }
 
     }
@@ -130,13 +140,10 @@ public class PlayerMovement : MonoBehaviour
             rb = GetComponent<Rigidbody2D>();
             float originalGravity = rb.gravityScale;
             rb.gravityScale = 0f;
-
             // Normalize the dash direction to ensure consistent speed in all directions
             dashDirection.Normalize();
-
             // Set the velocity based on the dash direction and power
             rb.velocity = dashDirection * dashingPower;
-
             tr.emitting = true;
 
             yield return new WaitForSeconds(dashingTime);
@@ -147,13 +154,10 @@ public class PlayerMovement : MonoBehaviour
         {
             Rigidbody rb3D = GetComponent<Rigidbody>();
             rb3D.useGravity = false;
-
             // Normalize the dash direction to ensure consistent speed in all directions
             dashDirection.Normalize();
-
             // Set the velocity based on the dash direction and power
             rb3D.velocity = dashDirection * dashingPower;
-
             tr.emitting = true;
 
             yield return new WaitForSeconds(dashingTime);
@@ -167,5 +171,23 @@ public class PlayerMovement : MonoBehaviour
 
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
+    }
+
+    private IEnumerator Jump()
+    {
+        canJump = false;
+        float time = 0f;
+        if (!cameraView.isDimension2D)
+        {
+            Rigidbody rb3D = GetComponent<Rigidbody>();
+            while (time < 1f)
+            {
+                float jumpVelocity = Mathf.Lerp(0, jumpForce, time);
+                rb3D.AddForce(new Vector3(0,0,jumpVelocity), ForceMode.Impulse);
+                time += Time.deltaTime * 10f;
+                yield return null;
+            }
+        }
+        canJump = true;
     }
 }
