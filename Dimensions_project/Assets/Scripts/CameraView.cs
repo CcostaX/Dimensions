@@ -64,6 +64,9 @@ public class CameraView : MonoBehaviour
             Destroy(player.GetComponent<BoxCollider>());
             Destroy(player.GetComponent<Rigidbody>());
 
+            ChangeObject3D(false);
+            ChangeObject2D(false);
+
             // Wait for the next frame
             yield return null;
 
@@ -74,8 +77,6 @@ public class CameraView : MonoBehaviour
             rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
             isDimension2D = true;
             player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z - 1);
-
-            ChangeObject3D(false);
         }
         else
         {
@@ -83,17 +84,20 @@ public class CameraView : MonoBehaviour
             Destroy(player.GetComponent<BoxCollider2D>());
             Destroy(player.GetComponent<Rigidbody2D>());
 
+            ChangeObject3D(true);
+            ChangeObject2D(true);
+
             // Wait for the next frame
             yield return null;
 
             BoxCollider collider = player.AddComponent<BoxCollider>();
             collider.size = new Vector3(1f, 1f, 1f);
+            collider.material.dynamicFriction = 0;
+            collider.material.staticFriction = 0;
             Rigidbody rigidbody = player.AddComponent<Rigidbody>();
             rigidbody.drag = 4;
             rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             isDimension2D = false;
-
-            ChangeObject3D(true);
         }
     }
 
@@ -106,22 +110,37 @@ public class CameraView : MonoBehaviour
             floor.GetComponent<BoxCollider>().enabled = isPlayerDimension3D;
         }
 
-        if (isPlayerDimension3D)
+        GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
+        foreach (GameObject object3D in objects3d)
         {
-            //Add Z scale to object3D
-            GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
-            foreach (GameObject object3D in objects3d)
+            //object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
+            Rigidbody rbObject = object3D.GetComponent<Rigidbody>();
+            if (rbObject != null && isPlayerDimension3D)
             {
-                object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
+                rbObject.useGravity = true;
+            }
+            else if (rbObject != null && !isPlayerDimension3D)
+            {
+                rbObject.useGravity = false;
+
             }
         }
-        else
+    }
+
+    private void ChangeObject2D(bool isPlayerDimension3D)
+    {
+        GameObject[] objects2D = GameObject.FindGameObjectsWithTag("Object2D");
+        foreach (GameObject object2D in objects2D)
         {
-            //Remove Z scale to object3D
-            GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
-            foreach (GameObject object3D in objects3d)
+            if (isPlayerDimension3D)
             {
-                object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
+                //Dissapear block 2d
+                object2D.transform.localScale = new Vector3(0, 0, 0);
+            }
+            else
+            {
+                //Appear block 2d
+                object2D.transform.localScale = new Vector3(1, 1, 1);
             }
         }
     }
