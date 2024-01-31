@@ -12,6 +12,10 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private int previousDirection = -1;
 
+    //GroundCheck
+    private Transform groundCheck;
+    public LayerMask groundLayer;
+
     //DASH
     private bool canJump = true;
     public float jumpForce = -10;
@@ -62,12 +66,12 @@ public class PlayerMovement : MonoBehaviour
         moveDirection = new Vector2(moveX, moveY);
         moveDirection3D = new Vector3(moveX, moveY, 0);
 
-        if (Input.GetKeyDown(KeyCode.X) && canDash)
+        if (Input.GetKeyDown(KeyCode.X) && canDash) //Dash
         {
             StartCoroutine(Dash(moveDirection));
         }
 
-        if (Input.GetKeyDown(KeyCode.Z) && canJump)
+        if (Input.GetKeyDown(KeyCode.Z) && canJump) //Jump
         {
             StartCoroutine(Jump());
         }
@@ -77,12 +81,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (cameraView.isDimension2D)
         {
+            //2D movement
             rb = GetComponent<Rigidbody2D>();
             if (rb != null) 
                 rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
         }
         else
         {
+            //3D movement
             Rigidbody rb3D = GetComponent<Rigidbody>();
             if (rb3D != null)
             {
@@ -188,6 +194,35 @@ public class PlayerMovement : MonoBehaviour
                 yield return null;
             }
         }
-        canJump = true;
+
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        groundCheck = gameObject.transform.Find("GroundCheck");
+        LayerMask groundLayerMask = LayerMask.GetMask("Object3D");
+
+        if (collision.gameObject.tag == "Wall")
+        {
+            return;
+        }
+
+        // Perform a raycast in the Z-axis direction with a specified layer mask
+        RaycastHit hit;
+        Vector3 raycastOrigin = groundCheck.position + Vector3.forward * 0.1f;
+
+        if (Physics.Raycast(raycastOrigin, Vector3.forward, out hit, groundLayerMask))
+        {
+            float distance = hit.distance;
+            if (distance < 2f)
+                canJump = true;
+
+            Debug.Log("Distance to ground: " + distance);
+        }
+
+        if (collision.gameObject.tag == "Floor")
+        {
+            canJump = true;
+        }
     }
 }

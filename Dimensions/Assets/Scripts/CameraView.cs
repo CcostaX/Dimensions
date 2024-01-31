@@ -6,6 +6,7 @@ public class CameraView : MonoBehaviour
 {
     public Transform target;  // The player's transform
     public bool isDimension2D = true;
+    private GameObject groundCheckObject = null;
     [SerializeField] private Camera camera;
 
     void Start()
@@ -70,6 +71,7 @@ public class CameraView : MonoBehaviour
             // Wait for the next frame
             yield return null;
 
+            Destroy(groundCheckObject);
             BoxCollider2D collider2D = player.AddComponent<BoxCollider2D>();
             collider2D.size = new Vector2(1f, 1f);
             Rigidbody2D rigidbody2D = player.AddComponent<Rigidbody2D>();
@@ -91,13 +93,20 @@ public class CameraView : MonoBehaviour
             yield return null;
 
             BoxCollider collider = player.AddComponent<BoxCollider>();
-            collider.size = new Vector3(1f, 1f, 1f);
+            collider.size = new Vector3(0.5f, 0.5f, 0.5f);
             collider.material.dynamicFriction = 0;
             collider.material.staticFriction = 0;
             Rigidbody rigidbody = player.AddComponent<Rigidbody>();
             rigidbody.drag = 4;
             rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+
+            // Add a Ground Check object
+            groundCheckObject = new GameObject("GroundCheck");
+            groundCheckObject.transform.position = player.transform.position;
+            groundCheckObject.transform.localScale = new Vector3(1f, 1f, 1f);
+            groundCheckObject.transform.parent = player.transform;
             isDimension2D = false;
+
         }
     }
 
