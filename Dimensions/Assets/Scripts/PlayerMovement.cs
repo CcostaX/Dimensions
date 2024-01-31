@@ -17,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
 
     //DASH
-    private bool canJump = true;
+    public bool canJump = true;
     public float jumpForce = -10;
     public float dashJumpFriction = 10f;
     private bool canDash = true;
@@ -199,24 +199,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        groundCheck = gameObject.transform.Find("GroundCheck");
         LayerMask groundLayerMask = LayerMask.GetMask("Object3D");
-
-        if (collision.gameObject.tag == "Wall")
-        {
-            return;
-        }
-
-        // Perform a raycast in the Z-axis direction with a specified layer mask
         RaycastHit hit;
-        Vector3 raycastOrigin = groundCheck.position + Vector3.forward * 0.1f;
-
-        if (Physics.Raycast(raycastOrigin, Vector3.forward, out hit, groundLayerMask))
+        Vector3 raycastOrigin = transform.position + Vector3.up * 0.2f;
+        if (Physics.Raycast(raycastOrigin, transform.forward, out hit, groundLayerMask))
         {
             float distance = hit.distance;
-            if (distance < 2f)
+            if (distance < 0.5f)
                 canJump = true;
-
+                
             Debug.Log("Distance to ground: " + distance);
         }
 
@@ -224,5 +215,13 @@ public class PlayerMovement : MonoBehaviour
         {
             canJump = true;
         }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        /*if (collision.gameObject.tag == "Object3D")
+        {
+            collision.gameObject.GetComponent<PlayerMovement>().canJump = false;
+        }*/
     }
 }

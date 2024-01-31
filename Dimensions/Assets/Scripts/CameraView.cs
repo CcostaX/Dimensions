@@ -105,6 +105,10 @@ public class CameraView : MonoBehaviour
             groundCheckObject.transform.position = player.transform.position;
             groundCheckObject.transform.localScale = new Vector3(1f, 1f, 1f);
             groundCheckObject.transform.parent = player.transform;
+
+
+
+
             isDimension2D = false;
 
         }

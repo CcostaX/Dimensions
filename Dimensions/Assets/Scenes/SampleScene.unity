@@ -3081,6 +3081,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 969750728}
     m_Modifications:
+    - target: {fileID: 4785617204445927432, guid: 02f11af2cbd93774bab12a066b60525a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7366448707326937839, guid: 02f11af2cbd93774bab12a066b60525a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.208
+      objectReference: {fileID: 0}
     - target: {fileID: 7523209087656058272, guid: 02f11af2cbd93774bab12a066b60525a, type: 3}
       propertyPath: m_Name
       value: MovableBlock
@@ -3139,7 +3147,7 @@ PrefabInstance:
       objectReference: {fileID: 728236650}
     - target: {fileID: 7523209087656058279, guid: 02f11af2cbd93774bab12a066b60525a, type: 3}
       propertyPath: m_VersionIndex
-      value: 11
+      value: 17
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 02f11af2cbd93774bab12a066b60525a, type: 3}
