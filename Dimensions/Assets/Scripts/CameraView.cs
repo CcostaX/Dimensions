@@ -78,7 +78,7 @@ public class CameraView : MonoBehaviour
             rigidbody2D.gravityScale = 0;
             rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
             isDimension2D = true;
-            player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z - 1);
+            player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -6f);
         }
         else
         {
@@ -106,11 +106,16 @@ public class CameraView : MonoBehaviour
             groundCheckObject.transform.localScale = new Vector3(1f, 1f, 1f);
             groundCheckObject.transform.parent = player.transform;
 
-
-
-
             isDimension2D = false;
-
+            RaycastHit hit;
+            if (Physics.Raycast(groundCheckObject.transform.position, Vector3.forward, out hit))
+            {
+                // Calculate the position slightly above the detected object along the normal
+                Vector3 newPosition = hit.point + hit.normal * 0.5f;
+                Debug.Log(player.transform.position.z + " " + newPosition.z);
+                // Set the character's position to the new position
+                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, newPosition.z);
+            }
         }
     }
 
