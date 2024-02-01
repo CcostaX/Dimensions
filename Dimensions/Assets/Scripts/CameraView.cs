@@ -17,11 +17,12 @@ public class CameraView : MonoBehaviour
     {
         if (target != null)
         {
+            bool onStairs = target.position.z < -2.1f;
             // Set the camera's position to match the player's position
             if (camera.orthographic == false)
             {
                 //Dimension 2.5D
-                transform.position = new Vector3(target.position.x, target.position.y - 18, transform.position.z);
+                transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
             }
             else
             {
@@ -111,7 +112,7 @@ public class CameraView : MonoBehaviour
             if (Physics.Raycast(groundCheckObject.transform.position, Vector3.forward, out hit))
             {
                 // Calculate the position slightly above the detected object along the normal
-                Vector3 newPosition = hit.point + hit.normal * 0.5f;
+                Vector3 newPosition = hit.point + hit.normal * 0.7f;
                 Debug.Log(player.transform.position.z + " " + newPosition.z);
                 // Set the character's position to the new position
                 player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, newPosition.z);
