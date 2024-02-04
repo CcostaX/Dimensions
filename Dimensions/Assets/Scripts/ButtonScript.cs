@@ -12,6 +12,9 @@ public class ButtonScript : MonoBehaviour
     [SerializeField] private int currentRoom = -1;
     private GameManager gameManager;
 
+    [Header("2D Settings")]
+    [SerializeField] private GameObject press;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,45 +24,13 @@ public class ButtonScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider collision)
     {
+        //verify if all buttons are pressed (2D and 3D)
         if (!isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object3D"))
         {
-            sound.Play();
+            //transform pressed button to simulate press on button
             button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, 0.07f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 0.07f);
-            isPressed = true;
-
-            GameObject[] buttons = GameObject.FindGameObjectsWithTag("ButtonPress");
-            int buttonPressedCount = 0;
-            int buttonInRoomCount = 0;
-            foreach (GameObject button in buttons)
-            {
-                if (button.GetComponent<ButtonScript>().currentRoom == gameManager.currentRoom)
-                {
-                    buttonInRoomCount++;
-                    if (button.GetComponent<ButtonScript>().isPressed)
-                    {
-                        buttonPressedCount++;
-                    }
-                }
-            }
-
-            Debug.Log("Button Pressed Count: " + buttonPressedCount);
-            Debug.Log("Button Room: " + buttonInRoomCount);
-            if (buttonPressedCount == buttonInRoomCount)
-            {
-                //Disable all buttons pressed
-                foreach (GameObject button in buttons)
-                {
-                    if (button.GetComponent<ButtonScript>().isPressed)
-                    {
-                        if (currentRoom == gameManager.currentRoom)
-                        {
-                            button.SetActive(false);
-                            door.SetActive(false);
-                        }
-                    }
-                }
-            }
+            verifyPressedButtons();
         }
     }
 
@@ -70,6 +41,82 @@ public class ButtonScript : MonoBehaviour
             button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, -0.05f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, -0.05f);
             isPressed = false;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //verify if all buttons are pressed (2D and 3D)
+        if (!isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object2D"))
+        {
+            //Change press color
+            Color newColor;
+            if (ColorUtility.TryParseHtmlString("#990000", out newColor)) //dark red
+            {
+                SpriteRenderer rendererComponent = press.GetComponent<SpriteRenderer>();
+                if (rendererComponent != null)
+                {
+                    rendererComponent.material.color = newColor;
+                }
+            }
+
+            verifyPressedButtons();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object2D"))
+        {
+            //Change press color
+            Color newColor;
+            if (door.activeSelf && ColorUtility.TryParseHtmlString("#ff0000", out newColor)) //red
+            {
+                SpriteRenderer rendererComponent = press.GetComponent<SpriteRenderer>();
+                if (rendererComponent != null)
+                {
+                    rendererComponent.material.color = newColor;
+                }
+            }
+
+            isPressed = false;
+        }
+    }
+
+    private void verifyPressedButtons()
+    {
+        sound.Play();
+        isPressed = true;
+
+        GameObject[] buttons = GameObject.FindGameObjectsWithTag("ButtonPress");
+        int buttonPressedCount = 0;
+        int buttonInRoomCount = 0;
+        foreach (GameObject button in buttons)
+        {
+            if (button.GetComponent<ButtonScript>().currentRoom == gameManager.currentRoom)
+            {
+                buttonInRoomCount++;
+                if (button.GetComponent<ButtonScript>().isPressed)
+                {
+                    buttonPressedCount++;
+                }
+            }
+        }
+
+        if (buttonPressedCount == buttonInRoomCount)
+        {
+            //Disable all buttons pressed
+            foreach (GameObject button in buttons)
+            {
+                if (button.GetComponent<ButtonScript>().isPressed)
+                {
+                    if (currentRoom == gameManager.currentRoom)
+                    {
+                        door.SetActive(false);
+                        button.SetActive(false);
+                    }
+                }
+            }
         }
     }
 }
