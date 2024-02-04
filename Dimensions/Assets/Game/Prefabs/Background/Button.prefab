@@ -350,7 +350,7 @@ GameObject:
   - component: {fileID: 2476245757042226954}
   m_Layer: 0
   m_Name: Collider
-  m_TagString: Untagged
+  m_TagString: ButtonPress
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -378,7 +378,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2476245757042226952}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -508,6 +508,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 2476245756919327865}
+  isPressed: 0
 --- !u!1 &2476245757213906521
 GameObject:
   m_ObjectHideFlags: 0
@@ -854,3 +855,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 0}
+  isPressed: 0

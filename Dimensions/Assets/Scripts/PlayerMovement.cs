@@ -216,12 +216,4 @@ public class PlayerMovement : MonoBehaviour
             canJump = true;
         }
     }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        /*if (collision.gameObject.tag == "Object3D")
-        {
-            collision.gameObject.GetComponent<PlayerMovement>().canJump = false;
-        }*/
-    }
 }

@@ -6,9 +6,9 @@ using UnityEngine.Events;
 public class ButtonScript : MonoBehaviour
 {
     public GameObject button;
-    GameObject presser;
     AudioSource sound;
-    bool isPressed;
+    public bool isPressed = false;
+    [SerializeField] private GameObject door;
 
     // Start is called before the first frame update
     void Start()
@@ -16,38 +16,46 @@ public class ButtonScript : MonoBehaviour
         sound = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter(Collider collision)
     {
-        
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!isPressed)
+        if (!isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object3D"))
         {
             sound.Play();
             button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, 0.07f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 0.07f);
-            presser = collision.collider.gameObject;
             isPressed = true;
+
+            GameObject[] buttons = GameObject.FindGameObjectsWithTag("ButtonPress");
+            int buttonPressedCount = 0;
+            foreach (GameObject button in buttons)
+            {
+                if (button.GetComponent<ButtonScript>().isPressed)
+                {
+                    buttonPressedCount++;
+                }
+            }
+            if (buttonPressedCount == buttons.Length)
+            {
+                //Disable all buttons pressed
+                foreach (GameObject button in buttons)
+                {
+                    if (button.GetComponent<ButtonScript>().isPressed)
+                    {
+                        button.SetActive(false);
+                        door.SetActive(false);
+                    }
+                }
+            }
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider collision)
     {
-        Debug.Log(collision.gameObject.name);
-        if (collision.gameObject.tag == "Player")
+        if (isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object3D"))
         {
             button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, -0.05f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, -0.05f);
             isPressed = false;
         }
-    }
-
-
-    public void SpawnSphere()
-    {
-        Debug.Log("Pressed");
     }
 }
