@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public GameObject currentSpawnPoint;
+
     public float moveSpeed = 5f;
     private Rigidbody2D rb;
     private Vector2 moveDirection;
@@ -214,6 +216,10 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.tag == "Floor")
         {
             canJump = true;
+        }
+        if (collision.gameObject.layer == 9) //Layer = Spikes
+        {
+            transform.position = currentSpawnPoint.transform.position;
         }
     }
 }

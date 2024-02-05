@@ -5,6 +5,7 @@ using UnityEngine;
 public class CurrentRoom : MonoBehaviour
 {
     [SerializeField] private int currentRoom = 0;
+    [SerializeField] private bool canChangeDimension = true;
     private GameManager gameManager;
     // Start is called before the first frame update
     void Start()
@@ -24,6 +25,8 @@ public class CurrentRoom : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             gameManager.currentRoom = currentRoom;
+            GameObject spawnPoint = transform.GetChild(0).gameObject;
+            collision.gameObject.GetComponent<PlayerMovement>().currentSpawnPoint = spawnPoint;
         }
     }
 
@@ -32,6 +35,8 @@ public class CurrentRoom : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             gameManager.currentRoom = currentRoom;
+            GameObject spawnPoint = transform.GetChild(0).gameObject;
+            collision.gameObject.GetComponent<PlayerMovement>().currentSpawnPoint = spawnPoint;
         }
     }
 }
