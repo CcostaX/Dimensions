@@ -98,6 +98,7 @@ public class CameraView : MonoBehaviour
             collider.material.dynamicFriction = 0;
             collider.material.staticFriction = 0;
             Rigidbody rigidbody = player.AddComponent<Rigidbody>();
+            rigidbody.mass = 0.6f;
             rigidbody.drag = 4;
             rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 

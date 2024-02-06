@@ -24,9 +24,9 @@ public class PlayerMovement : MonoBehaviour
     public float dashJumpFriction = 10f;
     private bool canDash = true;
     private bool isDashing = false;
-    private float dashingTime = 0.2f;
-    private float dashingPower = 24f;
-    private float dashingCooldown = 0.5f;
+    [SerializeField] private float dashingTime = 0.2f;
+    [SerializeField] private float dashingPower = 24f;
+    [SerializeField] private float dashingCooldown = 0.5f;
 
     public CameraView cameraView;
 
@@ -217,6 +217,14 @@ public class PlayerMovement : MonoBehaviour
         {
             canJump = true;
         }
+        if (collision.gameObject.layer == 9) //Layer = Spikes
+        {
+            transform.position = currentSpawnPoint.transform.position;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
         if (collision.gameObject.layer == 9) //Layer = Spikes
         {
             transform.position = currentSpawnPoint.transform.position;
