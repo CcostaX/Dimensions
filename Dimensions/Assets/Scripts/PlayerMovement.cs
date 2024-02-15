@@ -85,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
         {
             //2D movement
             rb = GetComponent<Rigidbody2D>();
-            if (rb != null) 
+            if (rb != null)
                 rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
         }
         else
@@ -221,9 +221,7 @@ public class PlayerMovement : MonoBehaviour
         {
             float distance = hit.distance;
             if (distance < 0.5f)
-                canJump = true;
-                
-            Debug.Log("Distance to ground: " + distance);
+                canJump = true;     
         }
 
         if (collision.gameObject.tag == "Floor")
@@ -234,10 +232,6 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = currentSpawnPoint.transform.position;
         }
-        if (collision.gameObject.tag == "Enemy") //Layer = Spikes
-        {
-            Debug.Log("ola");
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -245,10 +239,6 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.layer == 9) //Layer = Spikes
         {
             transform.position = currentSpawnPoint.transform.position;
-        }
-        if (collision.gameObject.tag == "Enemy") //Layer = Spikes
-        {
-            Debug.Log("ola2d");
         }
     }
 }

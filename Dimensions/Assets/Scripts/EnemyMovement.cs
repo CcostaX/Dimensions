@@ -13,8 +13,12 @@ public class EnemyMovement : MonoBehaviour
     private Rigidbody rb;
     [SerializeField] private GameObject player;
     private SpriteRenderer spriteRenderer;
-    private bool isBattleMode = true;
+    public bool isBattleMode = true;
+    public bool isDangerous = false;
     private Vector3 moveDirection;
+
+    public GameObject battleZoneSpawnPoint2D;
+    public GameObject battleZoneSpawnPoint;
 
     private float timer = 0f;
 
@@ -53,37 +57,71 @@ public class EnemyMovement : MonoBehaviour
     {
         if (isBattleMode)
         {
-            if (cameraView.isDimension2D)
+            float distance = Vector2.Distance(player.transform.position, this.transform.position);
+            if (distance < 10)
             {
-                //2D movement
-                rb2D = GetComponent<Rigidbody2D>();
-                if (rb2D != null)
-                    rb2D.velocity = moveDirection * moveSpeed;
-            }
-            else
-            {
-                //3D movement
-                rb = GetComponent<Rigidbody>();
-                if (rb != null)
+                if (cameraView.isDimension2D)
                 {
-                    Debug.Log(moveDirection);
-                    rb.velocity = moveDirection * moveSpeed;
+
+                    //2D movement
+                    rb2D = GetComponent<Rigidbody2D>();
+                    if (rb2D != null)
+                    {
+                        Vector2 normalizedDirection = moveDirection.normalized;
+                        transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+                    }
+                }
+                else
+                {
+                    //3D movement
+                    rb = GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        Vector3 normalizedDirection = moveDirection.normalized;
+                        transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+                    }
                 }
             }
         }
         else
         {
-            float distance = Vector3.Distance(player.transform.position, this.transform.position);
-            if (distance < 7.5)
+            if (cameraView.isDimension2D)
             {
-                Vector3 pos = Vector3.MoveTowards(transform.position, player.transform.position, moveSpeed * Time.deltaTime);
-                rb2D.MovePosition(pos);
-                transform.LookAt(player.transform);
-                spriteRenderer = GetComponent<SpriteRenderer>();
-                if (player.transform.position.x < this.transform.position.x)
-                    spriteRenderer.flipX = true;
-                else
-                    spriteRenderer.flipX = false;
+                float distance = Vector2.Distance(player.transform.position, this.transform.position);
+                if (distance < 7.5)
+                {
+                    Vector2 pos = Vector2.MoveTowards(transform.position, player.transform.position, moveSpeed * Time.deltaTime);
+                    rb2D = GetComponent<Rigidbody2D>();
+                    if (rb2D != null)
+                    {
+                        rb2D.MovePosition(pos);
+                        //transform.LookAt(player.transform);
+                        spriteRenderer = GetComponent<SpriteRenderer>();
+                        if (player.transform.position.x < this.transform.position.x)
+                            spriteRenderer.flipX = true;
+                        else
+                            spriteRenderer.flipX = false;
+                    }
+                }
+            }
+            else
+            {
+                float distance = Vector3.Distance(player.transform.position, this.transform.position);
+                if (distance < 7.5)
+                {
+                    Vector3 pos = Vector3.MoveTowards(transform.position, player.transform.position, moveSpeed * Time.deltaTime);
+                    rb = GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        rb.MovePosition(pos);
+                        //transform.LookAt(player.transform);
+                        spriteRenderer = GetComponent<SpriteRenderer>();
+                        if (player.transform.position.x < this.transform.position.x)
+                            spriteRenderer.flipX = true;
+                        else
+                            spriteRenderer.flipX = false;
+                    }                   
+                }
             }
         }
     }
@@ -92,21 +130,15 @@ public class EnemyMovement : MonoBehaviour
     {
         if (collision.gameObject.tag == "Wall" && isBattleMode && timer > 0.1f)
         {
-            float randomX = Random.Range(-1f, 1f);
-            float randomY = Random.Range(-1f, 1f);
             foreach (GameObject wall in walls)
             {
                 if (collision.gameObject.name == wall.name && (wall.name.Contains("up") || wall.name.Contains("down")))
                 {
-                    moveDirection = new Vector2(randomX, -moveDirection.y);
-                    timer = 0f;
-                    return;
+                    ChangeEnemyDirection(true);
                 }
                 else if (collision.gameObject.name == wall.name && (wall.name.Contains("left") || wall.name.Contains("right")))
                 {
-                    moveDirection = new Vector2(-moveDirection.x, randomY);
-                    timer = 0f;
-                    return;
+                    ChangeEnemyDirection(false);
                 }
             }
         }
@@ -116,21 +148,40 @@ public class EnemyMovement : MonoBehaviour
     {
         if (collision.gameObject.tag == "Wall" && isBattleMode)
         {
-            float randomX = Random.Range(-1f, 1f);
-            float randomY = Random.Range(-1f, 1f);
             foreach (GameObject wall in walls)
             {
                 if (collision.gameObject.transform.parent.name == wall.name && (wall.name.Contains("up") || wall.name.Contains("down")))
                 {
-                    moveDirection = new Vector2(randomX, -moveDirection.y);
+                    ChangeEnemyDirection(true);
                     return;
                 }
                 else if (collision.gameObject.transform.parent.name == wall.name && (wall.name.Contains("left") || wall.name.Contains("right")))
                 {
-                    moveDirection = new Vector2(-moveDirection.x, randomY);
-                    return;
+                    ChangeEnemyDirection(false);
                 }
             }
+        }
+    }
+
+    private void ChangeEnemyDirection(bool changeX)
+    {
+        float randomX = Random.Range(-1f, 1f);
+        float randomY = Random.Range(-1f, 1f);
+        foreach (GameObject wall in walls)
+        {
+            if (changeX)
+                moveDirection = new Vector2(randomX, -moveDirection.y);
+            else
+                moveDirection = new Vector2(-moveDirection.x, randomY);
+            timer = 0f;
+
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (moveDirection.x < 0f)
+                spriteRenderer.flipX = true;
+            else
+                spriteRenderer.flipX = false;
+
+            return;
         }
     }
 
@@ -139,7 +190,46 @@ public class EnemyMovement : MonoBehaviour
         if (collision.transform.parent.tag == "Player")
         {
             GameObject player = collision.transform.parent.gameObject;
-            StartCoroutine(player.GetComponent<PlayerMovement>().PlayerHit(player));
+            if (isBattleMode)
+                //Remove 1 life in battle
+                StartCoroutine(player.GetComponent<PlayerMovement>().PlayerHit(player));
+            else
+            {
+                if (isDangerous)
+                {
+                    //Spawn in the battle zone room
+                    collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                }
+                else
+                {
+                    //Spawn in the beggining of the room
+                    collision.transform.parent.gameObject.transform.position = player.GetComponent<PlayerMovement>().currentSpawnPoint.transform.position;
+                }
+            }
+        }
+    }
+
+    private void OnTriggerEnter(Collider collision)
+    {
+        if (collision.transform.parent.tag == "Player")
+        {
+            GameObject player = collision.transform.parent.gameObject;
+            if (isBattleMode)
+                //Remove 1 life in battle
+                StartCoroutine(player.GetComponent<PlayerMovement>().PlayerHit(player));
+            else
+            {
+                if (isDangerous)
+                {
+                    //Spawn in the battle zone room
+                    collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                }
+                else
+                {
+                    //Spawn in the beggining of the room
+                    collision.transform.parent.gameObject.transform.position = player.GetComponent<PlayerMovement>().currentSpawnPoint.transform.position;
+                }
+            }
         }
     }
 }
