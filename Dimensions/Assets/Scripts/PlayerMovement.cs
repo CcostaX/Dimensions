@@ -199,6 +199,19 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+
+    public IEnumerator PlayerHit(GameObject player)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            player.GetComponent<SpriteRenderer>().color = Color.red;
+            yield return new WaitForSeconds(0.15f);
+            player.GetComponent<SpriteRenderer>().color = Color.white;
+            yield return new WaitForSeconds(0.15f);
+        }
+        yield return null;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         LayerMask groundLayerMask = LayerMask.GetMask("Object3D");
@@ -221,6 +234,10 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = currentSpawnPoint.transform.position;
         }
+        if (collision.gameObject.tag == "Enemy") //Layer = Spikes
+        {
+            Debug.Log("ola");
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -228,6 +245,10 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.layer == 9) //Layer = Spikes
         {
             transform.position = currentSpawnPoint.transform.position;
+        }
+        if (collision.gameObject.tag == "Enemy") //Layer = Spikes
+        {
+            Debug.Log("ola2d");
         }
     }
 }

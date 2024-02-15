@@ -9,6 +9,7 @@ TagManager:
   - Object2D
   - Wall
   - ButtonPress
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Character
   - Room
   - Spikes
-  - 
+  - Wall
   - 
   - 
   - 

@@ -44,6 +44,7 @@ public class CameraView : MonoBehaviour
             GameObject player =  GameObject.FindGameObjectWithTag("Player");
             player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(false, player));
+            StartCoroutine(ChangeEnemyCollider(false));
         }
         else
         {
@@ -55,6 +56,7 @@ public class CameraView : MonoBehaviour
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(true, player));
+            StartCoroutine(ChangeEnemyCollider(true));
         }
     }
 
@@ -121,6 +123,68 @@ public class CameraView : MonoBehaviour
         }
     }
 
+    IEnumerator ChangeEnemyCollider(bool isPlayerDimension2D)
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach(GameObject enemy in enemies)
+        {
+            if (isPlayerDimension2D)
+            {
+                //change BoxCollider to BoxCollider2D
+                Destroy(enemy.GetComponent<BoxCollider>());
+                Destroy(enemy.GetComponent<Rigidbody>());
+
+                // Wait for the next frame
+                yield return null;
+
+                BoxCollider2D collider2D = enemy.AddComponent<BoxCollider2D>();
+                collider2D.size = new Vector2(1f, 1f);
+                Rigidbody2D rigidbody2D = enemy.AddComponent<Rigidbody2D>();
+                rigidbody2D.gravityScale = 0;
+                rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
+                isDimension2D = true;
+                enemy.transform.position = new Vector3(enemy.transform.position.x, enemy.transform.position.y, -10f);
+            }
+            else
+            {
+                //change BoxCollider2D to BoxCollider
+                Destroy(enemy.GetComponent<BoxCollider2D>());
+                Destroy(enemy.GetComponent<Rigidbody2D>());
+                Destroy(groundCheckObject);
+                // Wait for the next frame
+                yield return null;
+
+
+                BoxCollider collider = enemy.AddComponent<BoxCollider>();
+                collider.size = new Vector3(0.5f, 0.5f, 0.5f);
+                collider.material.dynamicFriction = 0;
+                collider.material.staticFriction = 0;
+                Rigidbody rigidbody = enemy.AddComponent<Rigidbody>();
+                rigidbody.mass = 0.6f;
+                rigidbody.drag = 4;
+                rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+
+                // Add a Ground Check object
+                groundCheckObject = new GameObject("GroundCheck");
+                groundCheckObject.transform.position = enemy.transform.position;
+                groundCheckObject.transform.localScale = new Vector3(1f, 1f, 1f);
+                groundCheckObject.transform.parent = enemy.transform;
+
+                isDimension2D = false;
+                RaycastHit hit;
+                if (Physics.Raycast(groundCheckObject.transform.position, Vector3.forward, out hit))
+                {
+                    // Calculate the position slightly above the detected object along the normal
+                    Vector3 newPosition = hit.point + hit.normal * 0.7f;
+                    Debug.Log(enemy.transform.position.z + " " + newPosition.z);
+                    // Set the character's position to the new position
+                    enemy.transform.position = new Vector3(enemy.transform.position.x, enemy.transform.position.y, newPosition.z);
+                }
+            }
+        }
+  
+    }
+
     private void ChangeObject3D(bool isPlayerDimension3D)
     {
         //Enable/Disable floor collision for 3D
@@ -133,7 +197,6 @@ public class CameraView : MonoBehaviour
         GameObject[] objects3d = GameObject.FindGameObjectsWithTag("Object3D");
         foreach (GameObject object3D in objects3d)
         {
-            //object3D.transform.localScale = new Vector3(object3D.transform.localScale.x, object3D.transform.localScale.y, object3D.transform.localScale.z);
             Rigidbody rbObject = object3D.GetComponent<Rigidbody>();
             if (rbObject != null && isPlayerDimension3D)
             {
