@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private GameManager gameManager;
     public GameObject currentSpawnPoint;
 
     public float moveSpeed = 5f;
@@ -14,11 +15,8 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private int previousDirection = -1;
 
-    //GroundCheck
-    private Transform groundCheck;
-    public LayerMask groundLayer;
-
     //DASH
+    private bool isPlayerStop = false;
     public bool canJump = true;
     public float jumpForce = -10;
     public float dashJumpFriction = 10f;
@@ -27,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float dashingTime = 0.2f;
     [SerializeField] private float dashingPower = 24f;
     [SerializeField] private float dashingCooldown = 0.5f;
+    [SerializeField] private GameObject sword;
 
     public CameraView cameraView;
 
@@ -38,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();    
         cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
     //physics calculations
     private void FixedUpdate()
     {
-        if (isDashing)
+        if (isDashing || isPlayerStop)
         {
             return;
         }
@@ -58,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
     }
     void ProcessInputs()
     {
-        if (isDashing)
+        if (isDashing || isPlayerStop)
         {
             return;
         }
@@ -103,10 +103,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAnimatorMove()
     {
-        animator.SetBool("isMoving", moveDirection.magnitude > 0);
+        if (!isPlayerStop)
+            animator.SetBool("isMoving", moveDirection.magnitude > 0);
 
         // Check for 8 directions
-        if (moveDirection.magnitude > 0)
+        if (moveDirection.magnitude > 0 && !isPlayerStop)
         {
             float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
 
@@ -124,6 +125,9 @@ public class PlayerMovement : MonoBehaviour
 
             if (direction != previousDirection)
             {
+                //float rotationAngle = direction * angle;
+                sword.transform.rotation = Quaternion.Euler(0f, 0f, angle-90);
+
                 spriteRenderer = GetComponent<SpriteRenderer>();
                 spriteRenderer.flipX = direction == 3 || direction == 4 || direction == 7 ;             
 
@@ -181,6 +185,23 @@ public class PlayerMovement : MonoBehaviour
         canDash = true;
     }
 
+    public void StopPlayer(bool isStopPlayer)
+    {
+        if (isStopPlayer)
+        {
+            isPlayerStop = true;
+
+            //stop 2D movement (2.5D not needed)
+            rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+                rb.velocity = new Vector2(0,0);
+        }
+        else
+        {
+            isPlayerStop = false;
+        }
+    }
+
     private IEnumerator Jump()
     {
         canJump = false;
@@ -202,6 +223,7 @@ public class PlayerMovement : MonoBehaviour
 
     public IEnumerator PlayerHit(GameObject player)
     {
+        gameManager.changeLives(false); //remove live
         for (int i = 0; i < 3; i++)
         {
             player.GetComponent<SpriteRenderer>().color = Color.red;

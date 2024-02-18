@@ -8,28 +8,96 @@ public class CameraView : MonoBehaviour
     public bool isDimension2D = true;
     private GameObject groundCheckObject = null;
     [SerializeField] private Camera camera;
-
+    [SerializeField] private GameManager gameManager;
+    private Transform enemy_FightingZone = null;
+    [SerializeField] private GameObject canvas_battlezone;
     void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     void Update()
     {
         if (target != null)
         {
-            bool onStairs = target.position.z < -2.1f;
             // Set the camera's position to match the player's position
             if (camera.orthographic == false)
             {
                 //Dimension 2.5D
-                transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
+                if (enemy_FightingZone == null)
+                {
+                    transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
+                }
+                else
+                {
+                    transform.position = new Vector3(enemy_FightingZone.position.x, enemy_FightingZone.position.y, target.position.z - 18);
+                }
             }
             else
             {
                 //Dimension 2D
-                transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
+                if (enemy_FightingZone == null)
+                {
+                    transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
+                }
+                else
+                {
+                    transform.position = new Vector3(enemy_FightingZone.position.x, enemy_FightingZone.position.y, transform.position.z);
+                }
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Space)) //Jump
+        {
+            ChangeCameraTo2D();
+        }
+    }
+
+
+    public IEnumerator CameraEnemy_BattleZone(Transform enemy)
+    {
+        float elapsedTime = 0f;
+        enemy_FightingZone = enemy;
+        Vector3 startingPos = camera.transform.position;
+        Vector3 targetPos = new Vector3(enemy.position.x, enemy.position.y, camera.transform.position.z);
+
+        while (elapsedTime < 2f)
+        {
+            if (camera.orthographic)
+            {
+                camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, 3f, elapsedTime / 2f);
+            }
+            else
+            {
+                camera.transform.position = Vector3.Lerp(startingPos, targetPos, elapsedTime / 2f);
+            }
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Move back to the original position
+        elapsedTime = 0f;
+        enemy_FightingZone = null;
+        canvas_battlezone.SetActive(true);
+        gameManager.finishBattleScreenAnimation = true;
+
+        while (elapsedTime < 2f)
+        {
+            if (camera.orthographic)
+            {
+                camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, 6f, elapsedTime / 2f);
+            }
+            else
+            {
+                camera.transform.position = Vector3.Lerp(targetPos, startingPos, elapsedTime / 2f);
+            }
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return null;
     }
 
     public void ChangeCameraTo2D()
@@ -50,7 +118,7 @@ public class CameraView : MonoBehaviour
         {
             //Change Dimension to 2D
             camera.orthographic = true;
-            camera.orthographicSize = 5;
+            camera.orthographicSize = 6;
             transform.rotation = Quaternion.Euler(0, transform.rotation.y, transform.rotation.z);
 
             GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -227,4 +295,5 @@ public class CameraView : MonoBehaviour
             }
         }
     }
+
 }

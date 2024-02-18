@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
@@ -8,6 +9,7 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class EnemyMovement : MonoBehaviour
 {
+    [SerializeField] private GameManager gameManager;
     public float moveSpeed = 0.11f;
     private Rigidbody2D rb2D;
     private Rigidbody rb;
@@ -17,14 +19,18 @@ public class EnemyMovement : MonoBehaviour
     public bool isDangerous = false;
     private Vector3 moveDirection;
 
-    public GameObject battleZoneSpawnPoint2D;
     public GameObject battleZoneSpawnPoint;
+
+    public float slimeMovementInterval = 10f;
+    private float slimeTimer = 0f;
 
     private float timer = 0f;
 
     [SerializeField] private CameraView cameraView;
+    [SerializeField] private GameObject canvas_battlezone;
     public GameObject[] walls;
 
+    private Vector3 initialPosition;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +43,10 @@ public class EnemyMovement : MonoBehaviour
         // Normalize the direction to ensure constant speed
         moveDirection = new Vector2(randomX, randomY);
 
+        initialPosition = transform.position;
+
         cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     private void Update()
@@ -57,29 +66,36 @@ public class EnemyMovement : MonoBehaviour
     {
         if (isBattleMode)
         {
-            float distance = Vector2.Distance(player.transform.position, this.transform.position);
-            if (distance < 10)
+            float distance = Vector2.Distance(player.transform.position, this.transform.position); //battle zone distance
+            if (distance < 10 && (!canvas_battlezone.activeSelf && gameManager.finishBattleScreenAnimation))
             {
-                if (cameraView.isDimension2D)
+                if (slimeTimer < slimeMovementInterval)
                 {
-
-                    //2D movement
-                    rb2D = GetComponent<Rigidbody2D>();
-                    if (rb2D != null)
+                    slimeTimer += Time.fixedDeltaTime;
+                    if (cameraView.isDimension2D)
                     {
-                        Vector2 normalizedDirection = moveDirection.normalized;
-                        transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+                        //2D movement
+                        rb2D = GetComponent<Rigidbody2D>();
+                        if (rb2D != null)
+                        {
+                            Vector2 normalizedDirection = moveDirection.normalized;
+                            transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+                        }
+                    }
+                    else
+                    {
+                        //3D movement
+                        rb = GetComponent<Rigidbody>();
+                        if (rb != null)
+                        {
+                            Vector3 normalizedDirection = moveDirection.normalized;
+                            transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
+                        }
                     }
                 }
                 else
                 {
-                    //3D movement
-                    rb = GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        Vector3 normalizedDirection = moveDirection.normalized;
-                        transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
-                    }
+                    StartCoroutine(BackToPosition());
                 }
             }
         }
@@ -95,7 +111,6 @@ public class EnemyMovement : MonoBehaviour
                     if (rb2D != null)
                     {
                         rb2D.MovePosition(pos);
-                        //transform.LookAt(player.transform);
                         spriteRenderer = GetComponent<SpriteRenderer>();
                         if (player.transform.position.x < this.transform.position.x)
                             spriteRenderer.flipX = true;
@@ -114,7 +129,6 @@ public class EnemyMovement : MonoBehaviour
                     if (rb != null)
                     {
                         rb.MovePosition(pos);
-                        //transform.LookAt(player.transform);
                         spriteRenderer = GetComponent<SpriteRenderer>();
                         if (player.transform.position.x < this.transform.position.x)
                             spriteRenderer.flipX = true;
@@ -124,6 +138,33 @@ public class EnemyMovement : MonoBehaviour
                 }
             }
         }
+    }
+
+    IEnumerator BackToPosition()
+    {
+        Debug.Log("Start to initial position");
+
+        if (cameraView.isDimension2D)
+            transform.gameObject.GetComponent<BoxCollider2D>().enabled = false;
+        else
+            transform.gameObject.GetComponent<BoxCollider>().enabled = false;
+
+        while (Vector3.Distance(transform.position, initialPosition) > 0.1f)
+        {
+            transform.position = Vector3.Lerp(transform.position, initialPosition, moveSpeed * Time.deltaTime);
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (cameraView.isDimension2D)
+            transform.gameObject.GetComponent<BoxCollider2D>().enabled = true;
+        else
+            transform.gameObject.GetComponent<BoxCollider>().enabled = true;
+
+        Debug.Log("Finish to initial position");
+        canvas_battlezone.SetActive(true);
+        player.GetComponent<PlayerMovement>().StopPlayer(true);
+        slimeTimer = 0f;
+        yield return null;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -198,7 +239,8 @@ public class EnemyMovement : MonoBehaviour
                 if (isDangerous)
                 {
                     //Spawn in the battle zone room
-                    collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                    //collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                    StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
                 }
                 else
                 {
@@ -222,7 +264,8 @@ public class EnemyMovement : MonoBehaviour
                 if (isDangerous)
                 {
                     //Spawn in the battle zone room
-                    collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                    //collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
+                    StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
                 }
                 else
                 {
