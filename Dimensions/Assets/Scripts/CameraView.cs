@@ -24,26 +24,12 @@ public class CameraView : MonoBehaviour
             if (camera.orthographic == false)
             {
                 //Dimension 2.5D
-                if (enemy_FightingZone == null)
-                {
-                    transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
-                }
-                else
-                {
-                    transform.position = new Vector3(enemy_FightingZone.position.x, enemy_FightingZone.position.y, target.position.z - 18);
-                }
+                transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
             }
             else
             {
                 //Dimension 2D
-                if (enemy_FightingZone == null)
-                {
-                    transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
-                }
-                else
-                {
-                    transform.position = new Vector3(enemy_FightingZone.position.x, enemy_FightingZone.position.y, transform.position.z);
-                }
+                transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
             }
         }
 
@@ -69,7 +55,11 @@ public class CameraView : MonoBehaviour
             }
             else
             {
-                camera.transform.position = Vector3.Lerp(startingPos, targetPos, elapsedTime / 2f);
+                camera.transform.position = Vector3.Lerp(
+                    startingPos, 
+                    new Vector3(targetPos.x, targetPos.y - 8, targetPos.z + 10),
+                    elapsedTime*7
+                );
             }
 
             elapsedTime += Time.deltaTime;
@@ -78,7 +68,6 @@ public class CameraView : MonoBehaviour
 
         // Move back to the original position
         elapsedTime = 0f;
-        enemy_FightingZone = null;
         canvas_battlezone.SetActive(true);
         gameManager.finishBattleScreenAnimation = true;
 
@@ -90,7 +79,12 @@ public class CameraView : MonoBehaviour
             }
             else
             {
-                camera.transform.position = Vector3.Lerp(targetPos, startingPos, elapsedTime / 2f);
+                camera.transform.position = Vector3.Lerp(
+                    new Vector3(targetPos.x, targetPos.y - 8, targetPos.z + 10),
+                    startingPos,
+                    elapsedTime * 7
+                );
+
             }
 
             elapsedTime += Time.deltaTime;

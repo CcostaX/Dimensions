@@ -151,6 +151,11 @@ public class EnemyMovement : MonoBehaviour
 
         while (Vector3.Distance(transform.position, initialPosition) > 0.1f)
         {
+            transform.position = Vector3.Lerp(
+                new Vector3(transform.position.x, transform.position.y, transform.position.z),
+                 new Vector3(initialPosition.x, initialPosition.y, transform.position.z), 
+                moveSpeed * Time.deltaTime
+            );
             transform.position = Vector3.Lerp(transform.position, initialPosition, moveSpeed * Time.deltaTime);
             yield return new WaitForSeconds(0.1f);
         }
@@ -239,7 +244,6 @@ public class EnemyMovement : MonoBehaviour
                 if (isDangerous)
                 {
                     //Spawn in the battle zone room
-                    //collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
                     StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
                 }
                 else
@@ -264,7 +268,6 @@ public class EnemyMovement : MonoBehaviour
                 if (isDangerous)
                 {
                     //Spawn in the battle zone room
-                    //collision.transform.parent.gameObject.transform.position = battleZoneSpawnPoint.transform.position;
                     StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
                 }
                 else
