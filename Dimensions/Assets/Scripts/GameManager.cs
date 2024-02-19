@@ -48,12 +48,69 @@ public class GameManager : MonoBehaviour
         
     }
 
-    public IEnumerator StartScreenAnimation(GameObject battleZoneSpawnPoint)
+    public IEnumerator ScreenAnimation_BattleZone(Vector3 spawnPoint)
     {
         //Obtain player position for going back
         GameObject player = GameObject.Find("Player");
         originalPlayerPosition = player.transform.position;
 
+        yield return StartCoroutine(ScreenAnimation(spawnPoint));
+
+        //find enemy in battle zone and start enemy camera view
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            if (enemy.GetComponent<EnemyMovement>().isBattleMode)
+            {
+                yield return StartCoroutine(cameraView.CameraEnemy_BattleZone(enemy.transform));
+                break;
+            }
+        }
+
+        Debug.Log("Finish animation");
+
+        yield return null;
+    }
+
+    public IEnumerator ScreenAnimation_Home(Vector3 spawnPoint)
+    {
+        yield return StartCoroutine(ScreenAnimation(spawnPoint));    
+
+        yield return StartCoroutine(PlayerInvisibility());
+
+        yield return null;
+    }
+
+    IEnumerator PlayerInvisibility()
+    {
+        GameObject player = GameObject.Find("Player");
+
+        //disable player collider
+        player.transform.Find("Trigger2D").GetComponent<BoxCollider2D>().enabled = false;
+        player.transform.Find("Trigger").GetComponent<BoxCollider>().enabled = false;
+
+        //resume player movement
+        finishBattleScreenAnimation = true;
+        player.GetComponent<PlayerMovement>().StopPlayer(false);
+
+        //Player invisibility color change
+        for (int i = 0; i < 10; i++)
+        {
+            player.GetComponent<SpriteRenderer>().color = Color.grey;
+            yield return new WaitForSeconds(0.15f);
+            player.GetComponent<SpriteRenderer>().color = Color.white;
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        //enable player collider
+        player.transform.Find("Trigger2D").GetComponent<BoxCollider2D>().enabled = true;
+        player.transform.Find("Trigger").GetComponent<BoxCollider>().enabled = true;
+
+        yield return null;
+    }
+
+    private IEnumerator ScreenAnimation(Vector3 spawnPoint)
+    {
         //Open Battle Screen
         finishBattleScreenAnimation = false;
         canvas_screen.SetActive(true);
@@ -85,14 +142,14 @@ public class GameManager : MonoBehaviour
             tempColor.a += speedTransparent;
             image.color = tempColor;
             if (rotation < 45)
-                middleImage.transform.Rotate(0, 0, rotation+=0.5f);
+                middleImage.transform.Rotate(0, 0, rotation += 0.5f);
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.5f);     
+        yield return new WaitForSeconds(0.5f);
 
         //Move player to battle zone
-        GameObject.Find("Player").transform.position = battleZoneSpawnPoint.transform.position;
+        GameObject.Find("Player").transform.position = spawnPoint;
         GameObject.Find("Player").GetComponent<PlayerMovement>().StopPlayer(true);
 
         yield return new WaitForSeconds(0.5f);
@@ -111,21 +168,6 @@ public class GameManager : MonoBehaviour
             rightSide.position += new Vector3(speed * Time.deltaTime, 0, 0);
             yield return null;
         }
-
-        //find enemy in battle zone and start enemy camera view
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            if (enemy.GetComponent<EnemyMovement>().isBattleMode)
-            {
-                yield return StartCoroutine(cameraView.CameraEnemy_BattleZone(enemy.transform));
-                break;
-            }
-        }
-
-        Debug.Log("Finish animation");
-
-        yield return null;
     }
 
 
@@ -149,12 +191,11 @@ public class GameManager : MonoBehaviour
 
     public void BattleZone_Fight()
     {
-        //iniate combat
+        //initiate combat
         Debug.Log("BattleZone - Fight");
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         player.GetComponent<PlayerMovement>().StopPlayer(false);
         canvas_battlezone.SetActive(false);
-        //StartCoroutine(FightDuration(player, 3));
     }
 
     IEnumerator FightDuration(GameObject player, int duration)

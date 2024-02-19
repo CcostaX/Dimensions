@@ -19,7 +19,7 @@ public class EnemyMovement : MonoBehaviour
     public bool isDangerous = false;
     private Vector3 moveDirection;
 
-    public GameObject battleZoneSpawnPoint;
+    public GameObject spawnPoint;
 
     public float slimeMovementInterval = 10f;
     private float slimeTimer = 0f;
@@ -235,16 +235,15 @@ public class EnemyMovement : MonoBehaviour
         if (collision.transform.parent.tag == "Player")
         {
             GameObject player = collision.transform.parent.gameObject;
-            if (isBattleMode)
-                //Remove 1 life in battle
+            if (isBattleMode) //Remove 1 life in battle
                 StartCoroutine(player.GetComponent<PlayerMovement>().PlayerHit(player));
             else
             {
-                if (isDangerous)
+                if (isDangerous) //Battle Mode
                 {
                     //Spawn in the battle zone room
                     gameManager.currentEnemyHit = this.gameObject;
-                    StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
+                    StartCoroutine(gameManager.ScreenAnimation_BattleZone(spawnPoint.transform.position));
                 }
                 else
                 {
@@ -260,15 +259,15 @@ public class EnemyMovement : MonoBehaviour
         if (collision.transform.parent.tag == "Player")
         {
             GameObject player = collision.transform.parent.gameObject;
-            if (isBattleMode)
-                //Remove 1 life in battle
+            if (isBattleMode) //Remove 1 life in battle
                 StartCoroutine(player.GetComponent<PlayerMovement>().PlayerHit(player));
             else
             {
-                if (isDangerous)
+                if (isDangerous) //Battle Mode
                 {
                     //Spawn in the battle zone room
-                    StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
+                    gameManager.currentEnemyHit = this.gameObject;
+                    StartCoroutine(gameManager.ScreenAnimation_BattleZone(spawnPoint.transform.position));
                 }
                 else
                 {

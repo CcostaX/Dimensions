@@ -72,7 +72,8 @@ public class PlayerAttack : MonoBehaviour
         {
             enemy.GetComponent<EnemyMovement>().ReturnToInitialPosition();
         }
-        transform.position = gameManager.originalPlayerPosition;
+
+        StartCoroutine(gameManager.ScreenAnimation_Home(gameManager.originalPlayerPosition));
 
         yield return null;
     }
@@ -80,5 +81,6 @@ public class PlayerAttack : MonoBehaviour
     public void Victory(GameObject currentEnemyInBattleZone)
     {
         StartCoroutine(VictoryScreen(currentEnemyInBattleZone));
+        //transform.position = gameManager.originalPlayerPosition;
     }
 }
