@@ -33,7 +33,7 @@ public class CameraView : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) //Jump
+        if (Input.GetKeyDown(KeyCode.Space) && gameManager.finishBattleScreenAnimation) //Jump
         {
             ChangeCameraTo2D();
         }
@@ -47,19 +47,17 @@ public class CameraView : MonoBehaviour
         Vector3 startingPos = camera.transform.position;
         Vector3 targetPos = new Vector3(enemy.position.x, enemy.position.y, camera.transform.position.z);
 
+        // Camera View on enemy
         while (elapsedTime < 2f)
         {
             if (camera.orthographic)
             {
                 camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, 3f, elapsedTime / 2f);
+                camera.transform.position = Vector3.Lerp(startingPos, targetPos, elapsedTime * 7);
             }
             else
             {
-                camera.transform.position = Vector3.Lerp(
-                    startingPos, 
-                    new Vector3(targetPos.x, targetPos.y - 8, targetPos.z + 10),
-                    elapsedTime*7
-                );
+                camera.transform.position = Vector3.Lerp(startingPos, new Vector3(targetPos.x, targetPos.y - 8, targetPos.z + 10), elapsedTime*7);
             }
 
             elapsedTime += Time.deltaTime;
@@ -68,14 +66,13 @@ public class CameraView : MonoBehaviour
 
         // Move back to the original position
         elapsedTime = 0f;
-        canvas_battlezone.SetActive(true);
-        gameManager.finishBattleScreenAnimation = true;
 
-        while (elapsedTime < 2f)
+        while (elapsedTime < 0.2f)
         {
             if (camera.orthographic)
             {
                 camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, 6f, elapsedTime / 2f);
+                camera.transform.position = Vector3.Lerp(targetPos, startingPos, elapsedTime * 7);
             }
             else
             {
@@ -90,6 +87,9 @@ public class CameraView : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
+        canvas_battlezone.SetActive(true);
+        gameManager.finishBattleScreenAnimation = true;
 
         yield return null;
     }

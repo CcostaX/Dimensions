@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,7 +17,9 @@ public class GameManager : MonoBehaviour
     private GameObject background_lives;
     [SerializeField] private GameObject canvas_battlezone;
     [SerializeField] private GameObject canvas_screen;
-    public bool finishBattleScreenAnimation = false;
+    public bool finishBattleScreenAnimation = true;
+    public Vector3 originalPlayerPosition;
+    public GameObject currentEnemyHit;
 
     [SerializeField] private CameraView cameraView;
     // Start is called before the first frame update
@@ -36,6 +39,7 @@ public class GameManager : MonoBehaviour
         }
         //OTHER
         cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
+        originalPlayerPosition = new Vector3(0, 0, 0);
     }
 
     // Update is called once per frame
@@ -46,11 +50,18 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator StartScreenAnimation(GameObject battleZoneSpawnPoint)
     {
+        //Obtain player position for going back
+        GameObject player = GameObject.Find("Player");
+        originalPlayerPosition = player.transform.position;
+
+        //Open Battle Screen
         finishBattleScreenAnimation = false;
         canvas_screen.SetActive(true);
         Transform leftSide = canvas_screen.transform.Find("Left_Side");
         Transform rightSide = canvas_screen.transform.Find("Right_Side");
         Transform middleImage = canvas_screen.transform.Find("Middle_Image");
+
+        float originalLeftPositionX = leftSide.position.x;
 
         Debug.Log("Start animation");
 
@@ -94,7 +105,7 @@ public class GameManager : MonoBehaviour
         }
 
         // Move Sides to edges
-        while (leftSide.position.x > -480)
+        while (leftSide.position.x > originalLeftPositionX)
         {
             leftSide.position -= new Vector3(speed * Time.deltaTime, 0, 0);
             rightSide.position += new Vector3(speed * Time.deltaTime, 0, 0);

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
@@ -9,9 +10,10 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private float damage;
     [SerializeField] private GameObject sword;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private GameObject canvas_battlezone;
 
     private float timeUntilMelee;
-    private float hitCooldownTimer = 0f;
+    public float hitCooldownTimer = 0f;
 
     private void Start()
     {
@@ -43,18 +45,40 @@ public class PlayerAttack : MonoBehaviour
         hitCooldownTimer += Time.deltaTime;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public IEnumerator VictoryScreen(GameObject currentEnemyInBattleZone)
     {
-        if (collision.tag == "Enemy" && hitCooldownTimer >= 0.5f)
-        {
-            Debug.Log("Enemy hit");
-            hitCooldownTimer = 0f;
-            int enemyLife = collision.gameObject.GetComponent<Enemy>().enemyLive;
-            if (enemyLife > 0)
-                collision.gameObject.GetComponent<Enemy>().enemyLive--;
-            else
-                Destroy(collision.gameObject);
+        GameObject victoryText = canvas_battlezone.transform.Find("VictoryText").gameObject;
 
+        //show battle zone and victory text
+        canvas_battlezone.SetActive(true);
+        canvas_battlezone.transform.Find("OptionsButton").gameObject.SetActive(false);
+        Destroy(currentEnemyInBattleZone);
+        victoryText.GetComponent<TextMeshProUGUI>().text = "Victory";
+
+        yield return new WaitForSeconds(3f);
+
+        //hide battle zone and victory text
+        victoryText.GetComponent<TextMeshProUGUI>().text = "";
+        canvas_battlezone.transform.Find("OptionsButton").gameObject.SetActive(true);
+        canvas_battlezone.SetActive(false);
+
+        //destroy enemy on puzzle
+        Destroy(gameManager.currentEnemyHit);
+        gameManager.currentEnemyHit = null;
+
+        //put player and other enemies back to initial position
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            enemy.GetComponent<EnemyMovement>().ReturnToInitialPosition();
         }
+        transform.position = gameManager.originalPlayerPosition;
+
+        yield return null;
+    }
+
+    public void Victory(GameObject currentEnemyInBattleZone)
+    {
+        StartCoroutine(VictoryScreen(currentEnemyInBattleZone));
     }
 }

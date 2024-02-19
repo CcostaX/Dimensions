@@ -31,6 +31,7 @@ public class EnemyMovement : MonoBehaviour
     public GameObject[] walls;
 
     private Vector3 initialPosition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -142,22 +143,21 @@ public class EnemyMovement : MonoBehaviour
 
     IEnumerator BackToPosition()
     {
-        Debug.Log("Start to initial position");
-
         if (cameraView.isDimension2D)
             transform.gameObject.GetComponent<BoxCollider2D>().enabled = false;
         else
             transform.gameObject.GetComponent<BoxCollider>().enabled = false;
 
-        while (Vector3.Distance(transform.position, initialPosition) > 0.1f)
+        float distance = Vector3.Distance(new Vector3(transform.position.x, transform.position.y, 0), new Vector3(initialPosition.x, initialPosition.y, 0));
+        while (distance > 0.1f)
         {
             transform.position = Vector3.Lerp(
-                new Vector3(transform.position.x, transform.position.y, transform.position.z),
-                 new Vector3(initialPosition.x, initialPosition.y, transform.position.z), 
+                transform.position,
+                new Vector3(initialPosition.x, initialPosition.y, initialPosition.z), 
                 moveSpeed * Time.deltaTime
             );
-            transform.position = Vector3.Lerp(transform.position, initialPosition, moveSpeed * Time.deltaTime);
             yield return new WaitForSeconds(0.1f);
+            distance = Vector3.Distance(new Vector3(transform.position.x, transform.position.y, 0), new Vector3(initialPosition.x, initialPosition.y, 0));
         }
 
         if (cameraView.isDimension2D)
@@ -165,7 +165,6 @@ public class EnemyMovement : MonoBehaviour
         else
             transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 
-        Debug.Log("Finish to initial position");
         canvas_battlezone.SetActive(true);
         player.GetComponent<PlayerMovement>().StopPlayer(true);
         slimeTimer = 0f;
@@ -244,6 +243,7 @@ public class EnemyMovement : MonoBehaviour
                 if (isDangerous)
                 {
                     //Spawn in the battle zone room
+                    gameManager.currentEnemyHit = this.gameObject;
                     StartCoroutine(gameManager.StartScreenAnimation(battleZoneSpawnPoint));
                 }
                 else
@@ -277,5 +277,10 @@ public class EnemyMovement : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ReturnToInitialPosition()
+    {
+        transform.position = initialPosition;
     }
 }
