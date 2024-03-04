@@ -10,48 +10,57 @@ public class LaserMovement : MonoBehaviour
 
     public bool isVertical = true;
     public bool isUp = true;
+    private bool isLaserRoom = false;
+    private Vector3 initialPosition;
+    private float laserTime;
+
     // Start is called before the first frame update
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        initialPosition = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (gameManager.currentRoom == 5)
+        if (!isLaserRoom && gameManager.currentRoom == 5)
         {
+            isLaserRoom = true;
             StartCoroutine(MoveLaser());
+        }
+        else if (isLaserRoom && gameManager.currentRoom != 5)
+        {
+            isLaserRoom = false;
         }
     }
 
     IEnumerator MoveLaser()
     {
-        if (isVertical)
+        laserTime = 0f;
+        //initialPosition = transform.position;
+
+        while (isLaserRoom)
         {
-            //vertical
-            float startY = transform.position.y;
-            while (true)
+            float movement = Mathf.Sin(laserTime * verticalSpeed) * upDownRange;
+
+            if (isVertical)
             {
-                float newY = startY + Mathf.PingPong(Time.time * verticalSpeed, upDownRange * 2);
-                if (isUp)
-                    newY = -newY;
-                transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-                yield return null;
-            }
-        }
-        else
-        {
-            //horizontal
-            float startZ = transform.position.z;
-            while (true)
-            {
-                float newZ = startZ + Mathf.PingPong(Time.time * verticalSpeed, upDownRange * 2);
                 if (!isUp)
-                    newZ = -newZ;
-                transform.position = new Vector3(transform.position.x, transform.position.y, -newZ);
-                yield return null;
+                    movement = -movement;
+                transform.position = new Vector3(initialPosition.x, initialPosition.y + movement, initialPosition.z);
             }
+            else
+            {
+                if (isUp)
+                    movement = -movement;
+                transform.position = new Vector3(initialPosition.x, initialPosition.y, initialPosition.z + movement);
+            }
+
+            // Increment the time progression
+            laserTime += Time.deltaTime;
+
+            yield return null;
         }
     }
 }
