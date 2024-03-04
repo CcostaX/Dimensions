@@ -27,6 +27,8 @@ public class CurrentRoom : MonoBehaviour
             gameManager.currentRoom = currentRoom;
             GameObject spawnPoint = transform.GetChild(0).gameObject;
             collision.gameObject.GetComponent<PlayerMovement>().currentSpawnPoint = spawnPoint;
+            if (currentRoom >= 0)
+                gameManager.currentRoomPosition = spawnPoint;
         }
     }
 
@@ -37,6 +39,8 @@ public class CurrentRoom : MonoBehaviour
             gameManager.currentRoom = currentRoom;
             GameObject spawnPoint = transform.GetChild(0).gameObject;
             collision.gameObject.GetComponent<PlayerMovement>().currentSpawnPoint = spawnPoint;
+            if (currentRoom >= 0)
+                gameManager.currentRoomPosition = spawnPoint;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CameraView : MonoBehaviour
@@ -11,6 +12,7 @@ public class CameraView : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     private Transform enemy_FightingZone = null;
     [SerializeField] private GameObject canvas_battlezone;
+    [SerializeField] private GameObject canvas_screen;
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -47,6 +49,13 @@ public class CameraView : MonoBehaviour
         Vector3 startingPos = camera.transform.position;
         Vector3 targetPos = new Vector3(enemy.position.x, enemy.position.y, camera.transform.position.z);
 
+        //Change text and color
+        TextMeshProUGUI monsterText = canvas_screen.transform.Find("MonsterText").GetComponent<TextMeshProUGUI>();
+        if (ColorUtility.TryParseHtmlString("#16A12E", out Color myColor)) //Dark Green
+        {
+            monsterText.color = myColor;
+        }
+
         // Camera View on enemy
         while (elapsedTime < 2f)
         {
@@ -60,12 +69,15 @@ public class CameraView : MonoBehaviour
                 camera.transform.position = Vector3.Lerp(startingPos, new Vector3(targetPos.x, targetPos.y - 8, targetPos.z + 10), elapsedTime*7);
             }
 
+
+            monsterText.text = "Green Slime";
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         // Move back to the original position
         elapsedTime = 0f;
+        monsterText.text = "";
 
         while (elapsedTime < 0.2f)
         {
@@ -187,9 +199,17 @@ public class CameraView : MonoBehaviour
 
     IEnumerator ChangeEnemyCollider(bool isPlayerDimension2D)
     {
+        //Set enemies in battlezone true
+        GameObject enemiesInBattleZone = GameObject.Find("BattleZone/Enemies");
+        foreach (Transform child in enemiesInBattleZone.transform)
+        {
+            child.gameObject.SetActive(true);
+        }
+
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach(GameObject enemy in enemies)
         {
+            Debug.Log(enemy);
             if (isPlayerDimension2D)
             {
                 //change BoxCollider to BoxCollider2D
@@ -244,7 +264,14 @@ public class CameraView : MonoBehaviour
                 }
             }
         }
-  
+
+        if (gameManager.currentRoom < 0)
+        {
+            foreach (Transform child in enemiesInBattleZone.transform)
+            {
+                child.gameObject.SetActive(false);
+            }
+        }
     }
 
     private void ChangeObject3D(bool isPlayerDimension3D)

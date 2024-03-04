@@ -224,13 +224,17 @@ public class PlayerMovement : MonoBehaviour
     public IEnumerator PlayerHit(GameObject player)
     {
         gameManager.changeLives(false); //remove live
-        for (int i = 0; i < 3; i++)
+        if (gameManager.lives > 0)
         {
-            player.GetComponent<SpriteRenderer>().color = Color.red;
-            yield return new WaitForSeconds(0.15f);
-            player.GetComponent<SpriteRenderer>().color = Color.white;
-            yield return new WaitForSeconds(0.15f);
+            for (int i = 0; i < 3; i++)
+            {
+                player.GetComponent<SpriteRenderer>().color = Color.red;
+                yield return new WaitForSeconds(0.15f);
+                player.GetComponent<SpriteRenderer>().color = Color.white;
+                yield return new WaitForSeconds(0.15f);
+            }
         }
+     
         yield return null;
     }
 

@@ -241,6 +241,9 @@ public class EnemyMovement : MonoBehaviour
             {
                 if (isDangerous) //Battle Mode
                 {
+                    //Spawn Enemy
+                    GameObject enemies = GameObject.Find("BattleZone/Enemies").gameObject;
+                    enemies.transform.Find("Slime").gameObject.SetActive(true);
                     //Spawn in the battle zone room
                     gameManager.currentEnemyHit = this.gameObject;
                     StartCoroutine(gameManager.ScreenAnimation_BattleZone(spawnPoint.transform.position));
@@ -265,6 +268,9 @@ public class EnemyMovement : MonoBehaviour
             {
                 if (isDangerous) //Battle Mode
                 {
+                    //Spawn Enemy
+                    GameObject enemies = GameObject.Find("BattleZone/Enemies").gameObject;
+                    enemies.transform.Find("Slime").gameObject.SetActive(true);
                     //Spawn in the battle zone room
                     gameManager.currentEnemyHit = this.gameObject;
                     StartCoroutine(gameManager.ScreenAnimation_BattleZone(spawnPoint.transform.position));

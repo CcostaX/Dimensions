@@ -28,7 +28,6 @@ public class Enemy : MonoBehaviour
             GameObject player = collision.gameObject.transform.parent.parent.parent.gameObject;
             if (player.GetComponent<PlayerAttack>().hitCooldownTimer >= 0.5f)
             {
-                Debug.Log("Enemy hit 2D");
                 player.GetComponent<PlayerAttack>().hitCooldownTimer = 0f;
                 if (enemyLive > 0)
                     StartCoroutine(EnemyHit(this.gameObject));
@@ -47,7 +46,6 @@ public class Enemy : MonoBehaviour
                 GameObject player = collision.gameObject.transform.parent.parent.parent.gameObject;
                 if (player.GetComponent<PlayerAttack>().hitCooldownTimer >= 0.5f)
                 {
-                    Debug.Log("Enemy hit 2D");
                     player.GetComponent<PlayerAttack>().hitCooldownTimer = 0f;
                     if (enemyLive > 0)
                         StartCoroutine(EnemyHit(this.gameObject));

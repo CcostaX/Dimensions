@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
@@ -8,6 +9,7 @@ using UnityEngine.UIElements;
 public class GameManager : MonoBehaviour
 {
     public int currentRoom = 0;
+    public GameObject currentRoomPosition;
     [Header("Lives")]
     public int lives = 5;
     public int maxLives = 5;
@@ -32,7 +34,12 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < maxLives; i++)
         {
             //Instantiate player's lives placeholder
-            Instantiate(livePrefabPlaceholder, new Vector3(livePrefab.transform.position.x + livePositionX, background_lives_placeholder.transform.position.y, background_lives_placeholder.transform.position.z), Quaternion.identity, background_lives_placeholder.transform);
+            Instantiate(livePrefabPlaceholder, new Vector3(livePrefab.transform.position.x + livePositionX, background_lives_placeholder.transform.position.y, background_lives_placeholder.transform.position.z), Quaternion.identity, background_lives_placeholder.transform);           
+            livePositionX += 100;
+        }
+        livePositionX = 230;
+        for (int i = 0; i < lives; i++)
+        {
             //Instantiate player's lives
             Instantiate(livePrefab, new Vector3(livePrefab.transform.position.x + livePositionX, background_lives.transform.position.y, background_lives.transform.position.z), Quaternion.identity, background_lives.transform);
             livePositionX += 100;
@@ -74,10 +81,8 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator ScreenAnimation_Home(Vector3 spawnPoint)
     {
-        yield return StartCoroutine(ScreenAnimation(spawnPoint));    
-
+        yield return StartCoroutine(ScreenAnimation(spawnPoint));
         yield return StartCoroutine(PlayerInvisibility());
-
         yield return null;
     }
 
@@ -146,6 +151,13 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        //put enemies back to initial position
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            enemy.GetComponent<EnemyMovement>().ReturnToInitialPosition();
+        }
+
         yield return new WaitForSeconds(0.5f);
 
         //Move player to battle zone
@@ -168,6 +180,8 @@ public class GameManager : MonoBehaviour
             rightSide.position += new Vector3(speed * Time.deltaTime, 0, 0);
             yield return null;
         }
+
+        yield return null;
     }
 
 
@@ -186,7 +200,46 @@ public class GameManager : MonoBehaviour
             GameObject lastLive = childrenLives[childrenLives.Length - 1].gameObject;
             Destroy(lastLive);
             lives--;
+
+            if (lives == 0)
+            {
+                Debug.Log("Player Death");
+                StartCoroutine(playerDeath());
+            }
         }
+    }
+
+    private IEnumerator playerDeath()
+    {
+        //Stop player movement and camera
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player.GetComponent<PlayerMovement>().StopPlayer(true);
+        finishBattleScreenAnimation = false;
+
+        //Enable canvas battlezone to show defeat message
+        canvas_battlezone.SetActive(true);
+        canvas_battlezone.transform.Find("OptionsButton").gameObject.SetActive(false);
+
+        TextMeshProUGUI victoryText = canvas_battlezone.transform.Find("VictoryText").GetComponent<TextMeshProUGUI>();
+        victoryText.text = "YOU DIED!";
+
+        while (victoryText.fontSize < 300) //appear logo
+        {
+            victoryText.fontSize += 0.25f;
+            yield return null;
+        }
+
+        //disable text and battle screen
+        victoryText.text = "";
+        victoryText.fontSize = 150;
+        canvas_battlezone.SetActive(false);
+        canvas_battlezone.transform.Find("OptionsButton").gameObject.SetActive(true);
+
+        //finish battle animation
+        yield return StartCoroutine(ScreenAnimation_Home(currentRoomPosition.transform.position));
+        finishBattleScreenAnimation = true;
+
+        yield return null;
     }
 
     public void BattleZone_Fight()
@@ -198,18 +251,15 @@ public class GameManager : MonoBehaviour
         canvas_battlezone.SetActive(false);
     }
 
-    IEnumerator FightDuration(GameObject player, int duration)
-    {
-        yield return new WaitForSeconds(duration);
-        player.GetComponent<PlayerMovement>().StopPlayer(true);
-        canvas_battlezone.SetActive(true);
-        yield return null;
-    }
 
 
     public void BattleZone_Heal()
     {
         Debug.Log("BattleZone - Heal");
+        changeLives(true);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player.GetComponent<PlayerMovement>().StopPlayer(false);
+        canvas_battlezone.SetActive(false);
     }
 
     public void BattleZone_Dialogue()
@@ -219,6 +269,8 @@ public class GameManager : MonoBehaviour
 
     public void BattleZone_Escape()
     {
+        canvas_battlezone.SetActive(false);
+        StartCoroutine(ScreenAnimation_Home(currentRoomPosition.transform.position));
         Debug.Log("BattleZone - Escape");
     }
 
