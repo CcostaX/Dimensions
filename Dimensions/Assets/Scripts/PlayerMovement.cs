@@ -212,7 +212,8 @@ public class PlayerMovement : MonoBehaviour
             while (time < 1f)
             {
                 float jumpVelocity = Mathf.Lerp(0, jumpForce, time);
-                rb3D.AddForce(new Vector3(0,0,jumpVelocity), ForceMode.Impulse);
+                //rb3D.AddForce(new Vector3(0,0,jumpVelocity), ForceMode.VelocityChange);
+                rb3D.velocity = new Vector3(0, 0, jumpVelocity);
                 time += Time.deltaTime * 10f;
                 yield return null;
             }
