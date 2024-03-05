@@ -8,8 +8,10 @@ public class LaserMovement : MonoBehaviour
     public float verticalSpeed = 5f;
     public float upDownRange = 5f;
 
+    public bool isMoving = true;
     public bool isVertical = true;
     public bool isUp = true;
+    public bool isRotated = false;
     private bool isLaserRoom = false;
     private Vector3 initialPosition;
     private float laserTime;
@@ -27,7 +29,8 @@ public class LaserMovement : MonoBehaviour
         if (!isLaserRoom && gameManager.currentRoom == 5)
         {
             isLaserRoom = true;
-            StartCoroutine(MoveLaser());
+            if (isMoving)
+                StartCoroutine(MoveLaser());
         }
         else if (isLaserRoom && gameManager.currentRoom != 5)
         {
@@ -44,23 +47,34 @@ public class LaserMovement : MonoBehaviour
         {
             float movement = Mathf.Sin(laserTime * verticalSpeed) * upDownRange;
 
-            if (isVertical)
+
+            if (isRotated)
             {
                 if (!isUp)
                     movement = -movement;
-                transform.position = new Vector3(initialPosition.x, initialPosition.y + movement, initialPosition.z);
+                transform.position = new Vector3(initialPosition.x + movement, initialPosition.y, initialPosition.z);
             }
             else
             {
-                if (isUp)
-                    movement = -movement;
-                transform.position = new Vector3(initialPosition.x, initialPosition.y, initialPosition.z + movement);
+                if (isVertical)
+                {
+                    if (!isUp)
+                        movement = -movement;
+                    transform.position = new Vector3(initialPosition.x, initialPosition.y + movement, initialPosition.z);
+                }
+                else
+                {
+                    if (isUp)
+                        movement = -movement;
+                    transform.position = new Vector3(initialPosition.x, initialPosition.y, initialPosition.z + movement);
+                }
             }
+
 
             // Increment the time progression
             laserTime += Time.deltaTime;
 
             yield return null;
         }
-    }
+    }   
 }

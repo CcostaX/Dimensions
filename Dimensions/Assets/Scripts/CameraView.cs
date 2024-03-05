@@ -10,9 +10,9 @@ public class CameraView : MonoBehaviour
     private GameObject groundCheckObject = null;
     [SerializeField] private Camera camera;
     [SerializeField] private GameManager gameManager;
-    private Transform enemy_FightingZone = null;
     [SerializeField] private GameObject canvas_battlezone;
     [SerializeField] private GameObject canvas_screen;
+    [SerializeField] private Light gameLight;
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -45,7 +45,6 @@ public class CameraView : MonoBehaviour
     public IEnumerator CameraEnemy_BattleZone(Transform enemy)
     {
         float elapsedTime = 0f;
-        enemy_FightingZone = enemy;
         Vector3 startingPos = camera.transform.position;
         Vector3 targetPos = new Vector3(enemy.position.x, enemy.position.y, camera.transform.position.z);
 
@@ -119,6 +118,8 @@ public class CameraView : MonoBehaviour
             player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(false, player));
             StartCoroutine(ChangeEnemyCollider(false));
+
+       
         }
         else
         {
@@ -131,6 +132,7 @@ public class CameraView : MonoBehaviour
             player.GetComponent<PlayerMovement>().moveSpeed = 5f;
             StartCoroutine(ChangePlayerCollider(true, player));
             StartCoroutine(ChangeEnemyCollider(true));
+
         }
     }
 
