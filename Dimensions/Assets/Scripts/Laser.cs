@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-
-    private void Start()
-    {
-        
-    }
-
     private void OnTriggerEnter(Collider collision)
     {
         if (collision.transform.parent != null && collision.transform.parent.tag == "Player")

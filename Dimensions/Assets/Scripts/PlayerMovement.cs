@@ -7,8 +7,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     public GameObject currentSpawnPoint;
 
+    public bool isPlayerDimension2D;
     public float moveSpeed = 5f;
-    private Rigidbody2D rb;
+    private Rigidbody2D rb2D;
+    private Rigidbody rb;
     private Vector2 moveDirection;
     private Vector3 moveDirection3D;
     private Animator animator;
@@ -34,7 +36,11 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        if (isPlayerDimension2D)
+            rb2D = GetComponent<Rigidbody2D>();
+        else
+            rb = GetComponent<Rigidbody>();
+
         animator = GetComponent<Animator>();    
         cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -84,15 +90,13 @@ public class PlayerMovement : MonoBehaviour
         if (cameraView.isDimension2D)
         {
             //2D movement
-            rb = GetComponent<Rigidbody2D>();
-            if (rb != null)
-                rb.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
+            if (rb2D != null)
+                rb2D.velocity = new Vector2(moveDirection.x * moveSpeed, moveDirection.y * moveSpeed);
         }
         else
         {
             //3D movement
-            Rigidbody rb3D = GetComponent<Rigidbody>();
-            if (rb3D != null)
+            if (rb != null)
             {
                 Vector3 normalizedDirection = moveDirection3D.normalized;
                 transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
@@ -149,9 +153,9 @@ public class PlayerMovement : MonoBehaviour
 
         if (cameraView.isDimension2D)
         {
-            rb = GetComponent<Rigidbody2D>();
-            float originalGravity = rb.gravityScale;
-            rb.gravityScale = 0f;
+            rb2D = GetComponent<Rigidbody2D>();
+            float originalGravity = rb2D.gravityScale;
+            rb2D.gravityScale = 0f;
             // Normalize the dash direction to ensure consistent speed in all directions
             dashDirection.Normalize();
             // Set the velocity based on the dash direction and power
@@ -160,21 +164,19 @@ public class PlayerMovement : MonoBehaviour
 
             yield return new WaitForSeconds(dashingTime);
 
-            rb.gravityScale = originalGravity;
+            rb2D.gravityScale = originalGravity;
         }
         else
         {
-            Rigidbody rb3D = GetComponent<Rigidbody>();
-            rb3D.useGravity = false;
+            rb.useGravity = false;
             // Normalize the dash direction to ensure consistent speed in all directions
             dashDirection.Normalize();
             // Set the velocity based on the dash direction and power
-            rb3D.velocity = dashDirection * dashingPower;
+            rb.velocity = dashDirection * dashingPower;
             tr.emitting = true;
 
             yield return new WaitForSeconds(dashingTime);
-
-            rb3D.useGravity = true;
+            rb.useGravity = true;
 
         }
 
@@ -191,10 +193,11 @@ public class PlayerMovement : MonoBehaviour
         {
             isPlayerStop = true;
 
-            //stop 2D movement (2.5D not needed)
-            rb = GetComponent<Rigidbody2D>();
-            if (rb != null)
-                rb.velocity = new Vector2(0,0);
+            //stop movement
+            if (rb2D != null)
+                rb2D.velocity = new Vector2(0,0);
+            else if (rb != null)
+                rb.velocity = new Vector3(0, 0, 0);
         }
         else
         {
@@ -208,17 +211,14 @@ public class PlayerMovement : MonoBehaviour
         float time = 0f;
         if (!cameraView.isDimension2D)
         {
-            Rigidbody rb3D = GetComponent<Rigidbody>();
             while (time < 1f)
             {
                 float jumpVelocity = Mathf.Lerp(0, jumpForce, time);
-                //rb3D.AddForce(new Vector3(0,0,jumpVelocity), ForceMode.VelocityChange);
-                rb3D.velocity = new Vector3(0, 0, jumpVelocity);
+                rb.velocity = new Vector3(0, 0, jumpVelocity);
                 time += Time.deltaTime * 10f;
                 yield return null;
             }
         }
-
     }
 
 

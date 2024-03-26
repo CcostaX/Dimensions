@@ -13,7 +13,7 @@ public class EnemyMovement : MonoBehaviour
     public float moveSpeed = 0.11f;
     private Rigidbody2D rb2D;
     private Rigidbody rb;
-    [SerializeField] private GameObject player;
+    [SerializeField] private GameObject[] players = new GameObject[2];
     private SpriteRenderer spriteRenderer;
     public bool isBattleMode = true;
     public bool isDangerous = false;
@@ -35,8 +35,20 @@ public class EnemyMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.Find("Player");
+        // Find and assign players
+        GameObject player2D = GameObject.Find("Player2D");
+        GameObject player3D = GameObject.Find("Player3D");
 
+        // Check if both players were found
+        if (player2D != null && player3D != null)
+        {
+            players[0] = player2D;
+            players[1] = player3D;
+        }
+        else
+        {
+            Debug.LogError("One or more players not found!");
+        }
         // Generate a random direction
         float randomX = Random.Range(-1f, 1f);
         float randomY = Random.Range(-1f, 1f);
@@ -65,10 +77,11 @@ public class EnemyMovement : MonoBehaviour
 
     private void SlimeMovement()
     {
+        float distance2D = Vector2.Distance(players[0].transform.position, this.transform.position); //battle zone distance 2D
+        float distance3D = Vector2.Distance(players[1].transform.position, this.transform.position); //battle zone distance 3D
         if (isBattleMode)
         {
-            float distance = Vector2.Distance(player.transform.position, this.transform.position); //battle zone distance
-            if (distance < 10 && (!canvas_battlezone.activeSelf && gameManager.finishBattleScreenAnimation))
+            if ((distance2D < 10 || distance3D < 10) && (!canvas_battlezone.activeSelf && gameManager.finishBattleScreenAnimation))
             {
                 if (slimeTimer < slimeMovementInterval)
                 {
@@ -104,16 +117,15 @@ public class EnemyMovement : MonoBehaviour
         {
             if (cameraView.isDimension2D)
             {
-                float distance = Vector2.Distance(player.transform.position, this.transform.position);
-                if (distance < 7.5)
+                if (distance2D < 7.5)
                 {
-                    Vector2 pos = Vector2.MoveTowards(transform.position, player.transform.position, moveSpeed * Time.deltaTime);
+                    Vector2 pos = Vector2.MoveTowards(transform.position, players[0].transform.position, moveSpeed * Time.deltaTime);
                     rb2D = GetComponent<Rigidbody2D>();
                     if (rb2D != null)
                     {
                         rb2D.MovePosition(pos);
                         spriteRenderer = GetComponent<SpriteRenderer>();
-                        if (player.transform.position.x < this.transform.position.x)
+                        if (players[0].transform.position.x < this.transform.position.x)
                             spriteRenderer.flipX = true;
                         else
                             spriteRenderer.flipX = false;
@@ -122,16 +134,15 @@ public class EnemyMovement : MonoBehaviour
             }
             else
             {
-                float distance = Vector3.Distance(player.transform.position, this.transform.position);
-                if (distance < 7.5)
+                if (distance3D < 7.5)
                 {
-                    Vector3 pos = Vector3.MoveTowards(transform.position, player.transform.position, moveSpeed * Time.deltaTime);
+                    Vector3 pos = Vector3.MoveTowards(transform.position, players[1].transform.position, moveSpeed * Time.deltaTime);
                     rb = GetComponent<Rigidbody>();
                     if (rb != null)
                     {
                         rb.MovePosition(pos);
                         spriteRenderer = GetComponent<SpriteRenderer>();
-                        if (player.transform.position.x < this.transform.position.x)
+                        if (players[1].transform.position.x < this.transform.position.x)
                             spriteRenderer.flipX = true;
                         else
                             spriteRenderer.flipX = false;
@@ -166,7 +177,8 @@ public class EnemyMovement : MonoBehaviour
             transform.gameObject.GetComponent<BoxCollider>().enabled = true;
 
         canvas_battlezone.SetActive(true);
-        player.GetComponent<PlayerMovement>().StopPlayer(true);
+        players[0].GetComponent<PlayerMovement>().StopPlayer(true);
+        players[1].GetComponent<PlayerMovement>().StopPlayer(true);
         slimeTimer = 0f;
         yield return null;
     }
@@ -212,22 +224,21 @@ public class EnemyMovement : MonoBehaviour
     {
         float randomX = Random.Range(-1f, 1f);
         float randomY = Random.Range(-1f, 1f);
-        foreach (GameObject wall in walls)
-        {
-            if (changeX)
-                moveDirection = new Vector2(randomX, -moveDirection.y);
-            else
-                moveDirection = new Vector2(-moveDirection.x, randomY);
-            timer = 0f;
+ 
+        if (changeX)
+            moveDirection = new Vector2(randomX, -moveDirection.y);
+        else
+            moveDirection = new Vector2(-moveDirection.x, randomY);
+        timer = 0f;
 
-            spriteRenderer = GetComponent<SpriteRenderer>();
-            if (moveDirection.x < 0f)
-                spriteRenderer.flipX = true;
-            else
-                spriteRenderer.flipX = false;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (moveDirection.x < 0f)
+            spriteRenderer.flipX = true;
+        else
+            spriteRenderer.flipX = false;
 
-            return;
-        }
+        return;
+        
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CameraView : MonoBehaviour
 {
-    public Transform target;  // The player's transform
+    [SerializeField] private GameObject[] players = new GameObject[2];
     public bool isDimension2D = true;
     private GameObject groundCheckObject = null;
     [SerializeField] private Camera camera;
@@ -16,29 +16,45 @@ public class CameraView : MonoBehaviour
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        // Find and assign players
+        GameObject player2D = GameObject.Find("Player2D");
+        GameObject player3D = GameObject.Find("Player3D");
+
+        // Check if both players were found
+        if (player2D != null && player3D != null)
+        {
+            players[0] = player2D;
+            players[1] = player3D;
+        }
+        else
+        {
+            Debug.LogError("One or more players not found!");
+        }
     }
 
     void Update()
     {
-        if (target != null)
+        if (players[0] != null && players[1] != null)
         {
             // Set the camera's position to match the player's position
             if (camera.orthographic == false)
             {
                 //Dimension 2.5D
-                transform.position = new Vector3(target.position.x, target.position.y - 18, target.position.z - 18);
+                transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y - 18, players[1].transform.position.z - 18);
             }
             else
             {
                 //Dimension 2D
-                transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
+                transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, transform.position.z);
             }
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && gameManager.finishBattleScreenAnimation) //Jump
         {
             ChangeCameraTo2D();
+            ChangePlayer2DAltitude();
         }
+
     }
 
 
@@ -114,12 +130,12 @@ public class CameraView : MonoBehaviour
             camera.fieldOfView = 17;
             transform.rotation = Quaternion.Euler(-45, transform.rotation.y, transform.rotation.z);
 
-            GameObject player =  GameObject.FindGameObjectWithTag("Player");
-            player.GetComponent<PlayerMovement>().moveSpeed = 5f;
-            StartCoroutine(ChangePlayerCollider(false, player));
+            //GameObject player =  GameObject.FindGameObjectWithTag("Player");
+            //player.GetComponent<PlayerMovement>().moveSpeed = 5f;
+            //StartCoroutine(ChangePlayerCollider(false, player));
             StartCoroutine(ChangeEnemyCollider(false));
 
-       
+            isDimension2D = false;
         }
         else
         {
@@ -128,11 +144,12 @@ public class CameraView : MonoBehaviour
             camera.orthographicSize = 6;
             transform.rotation = Quaternion.Euler(0, transform.rotation.y, transform.rotation.z);
 
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            player.GetComponent<PlayerMovement>().moveSpeed = 5f;
-            StartCoroutine(ChangePlayerCollider(true, player));
+            //GameObject player = GameObject.FindGameObjectWithTag("Player");
+            //player.GetComponent<PlayerMovement>().moveSpeed = 5f;
+            //StartCoroutine(ChangePlayerCollider(true, player));
             StartCoroutine(ChangeEnemyCollider(true));
 
+            isDimension2D = true;
         }
     }
 
@@ -145,7 +162,7 @@ public class CameraView : MonoBehaviour
             Destroy(player.GetComponent<Rigidbody>());
 
             ChangeObject3D(false);
-            ChangeObject2D(false);
+            //ChangeObject2D(false);
 
             // Wait for the next frame
             yield return null;
@@ -166,7 +183,7 @@ public class CameraView : MonoBehaviour
             Destroy(player.GetComponent<Rigidbody2D>());
 
             ChangeObject3D(true);
-            ChangeObject2D(true);
+            //ChangeObject2D(true);
 
             // Wait for the next frame
             yield return null;
@@ -301,22 +318,18 @@ public class CameraView : MonoBehaviour
         }
     }
 
-    private void ChangeObject2D(bool isPlayerDimension3D)
+    private void ChangePlayer2DAltitude()
     {
-        GameObject[] objects2D = GameObject.FindGameObjectsWithTag("Object2D");
-        foreach (GameObject object2D in objects2D)
+        if (camera.orthographic)
         {
-            if (isPlayerDimension3D)
-            {
-                //Dissapear block 2d
-                object2D.transform.localScale = new Vector3(0, 0, 0);
-            }
-            else
-            {
-                //Appear block 2d
-                object2D.transform.localScale = new Vector3(1, 1, 1);
-            }
+            //Camera 2d
+            players[0].transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, -10);
         }
+        else
+        {
+            //Camera 2.5d
+            players[0].transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, players[1].transform.position.z);
+        }
+        
     }
-
 }
