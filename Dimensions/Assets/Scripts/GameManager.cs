@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject currentPlayerCircle;
+    private float CirclePositionZ;
     [SerializeField] private GameObject[] players = new GameObject[2];
     public int currentRoom = 0;
     public GameObject currentRoomPosition;
@@ -72,7 +74,19 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (currentPlayerInControl == players[0])
+            currentPlayerCircle.transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, players[0].transform.position.z);
+        else if (currentPlayerInControl == players[1])
+        {
+            if (players[1].GetComponent<PlayerMovement>().canJump)
+            {
+                CirclePositionZ = players[1].transform.position.z;
+                currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y-0.5f, players[1].transform.position.z);
+            }
+            else
+                currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y-0.5f, CirclePositionZ);
+        }
+  
     }
 
     public IEnumerator ScreenAnimation_BattleZone(Vector3 spawnPoint)
