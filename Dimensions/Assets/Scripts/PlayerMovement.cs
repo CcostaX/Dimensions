@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     public GameObject currentSpawnPoint;
 
-    public bool isPlayerDimension2D;
+    public bool isPlayerDimension2D;    
     public float moveSpeed = 5f;
     private Rigidbody2D rb2D;
     private Rigidbody rb;
@@ -107,11 +107,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAnimatorMove()
     {
-        if (!isPlayerStop)
+        if (this.gameObject == gameManager.currentPlayerInControl && !isPlayerStop)
             animator.SetBool("isMoving", moveDirection.magnitude > 0);
 
         // Check for 8 directions
-        if (moveDirection.magnitude > 0 && !isPlayerStop)
+        if (this.gameObject == gameManager.currentPlayerInControl && moveDirection.magnitude > 0 && !isPlayerStop)
         {
             float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
 
@@ -129,7 +129,6 @@ public class PlayerMovement : MonoBehaviour
 
             if (direction != previousDirection)
             {
-                //float rotationAngle = direction * angle;
                 sword.transform.rotation = Quaternion.Euler(0f, 0f, angle-90);
 
                 spriteRenderer = GetComponent<SpriteRenderer>();
@@ -153,31 +152,36 @@ public class PlayerMovement : MonoBehaviour
 
         if (cameraView.isDimension2D)
         {
-            rb2D = GetComponent<Rigidbody2D>();
-            float originalGravity = rb2D.gravityScale;
-            rb2D.gravityScale = 0f;
-            // Normalize the dash direction to ensure consistent speed in all directions
-            dashDirection.Normalize();
-            // Set the velocity based on the dash direction and power
-            rb.velocity = dashDirection * dashingPower;
-            tr.emitting = true;
+            if (rb2D != null)
+            {
+                float originalGravity = rb2D.gravityScale;
+                rb2D.gravityScale = 0f;
+                // Normalize the dash direction to ensure consistent speed in all directions
+                dashDirection.Normalize();
+                // Set the velocity based on the dash direction and power
+                rb2D.velocity = dashDirection * dashingPower;
+                tr.emitting = true;
 
-            yield return new WaitForSeconds(dashingTime);
+                yield return new WaitForSeconds(dashingTime);
 
-            rb2D.gravityScale = originalGravity;
+                rb2D.gravityScale = originalGravity;
+            }
+
         }
         else
         {
-            rb.useGravity = false;
-            // Normalize the dash direction to ensure consistent speed in all directions
-            dashDirection.Normalize();
-            // Set the velocity based on the dash direction and power
-            rb.velocity = dashDirection * dashingPower;
-            tr.emitting = true;
+            if (rb != null)
+            {
+                rb.useGravity = false;
+                // Normalize the dash direction to ensure consistent speed in all directions
+                dashDirection.Normalize();
+                // Set the velocity based on the dash direction and power
+                rb.velocity = dashDirection * dashingPower;
+                tr.emitting = true;
 
-            yield return new WaitForSeconds(dashingTime);
-            rb.useGravity = true;
-
+                yield return new WaitForSeconds(dashingTime);
+                rb.useGravity = true;
+            }
         }
 
         tr.emitting = false;

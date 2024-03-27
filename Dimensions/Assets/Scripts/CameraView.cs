@@ -41,6 +41,7 @@ public class CameraView : MonoBehaviour
             {
                 //Dimension 2.5D
                 transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y - 18, players[1].transform.position.z - 18);
+                players[0].transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, players[1].transform.position.z);
             }
             else
             {
@@ -136,6 +137,10 @@ public class CameraView : MonoBehaviour
             StartCoroutine(ChangeEnemyCollider(false));
 
             isDimension2D = false;
+            //Change current character
+            gameManager.currentPlayerInControl = GameObject.Find("Player3D");
+            //stop 3D character movement
+            GameObject.Find("Player2D").GetComponent<Rigidbody2D>().velocity = new Vector2(0,0);
         }
         else
         {
@@ -150,6 +155,10 @@ public class CameraView : MonoBehaviour
             StartCoroutine(ChangeEnemyCollider(true));
 
             isDimension2D = true;
+            //Change current character
+            gameManager.currentPlayerInControl = GameObject.Find("Player2D");
+            //stop 3D character movement
+            GameObject.Find("Player3D").GetComponent<Rigidbody>().velocity = new Vector2(0, 0);
         }
     }
 
@@ -284,13 +293,13 @@ public class CameraView : MonoBehaviour
             }
         }
 
-        if (gameManager.currentRoom < 0)
+       /* if (gameManager.currentRoom < 0)
         {
             foreach (Transform child in enemiesInBattleZone.transform)
             {
                 child.gameObject.SetActive(false);
             }
-        }
+        }*/
     }
 
     private void ChangeObject3D(bool isPlayerDimension3D)

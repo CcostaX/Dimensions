@@ -8,8 +8,10 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private GameObject[] players = new GameObject[2];
     public int currentRoom = 0;
     public GameObject currentRoomPosition;
+    public GameObject currentPlayerInControl;
     [Header("Lives")]
     public int lives = 5;
     public int maxLives = 5;
@@ -20,7 +22,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject canvas_battlezone;
     [SerializeField] private GameObject canvas_screen;
     public bool finishBattleScreenAnimation = true;
-    public Vector3 originalPlayerPosition;
+    public Vector2 originalPlayerPosition2D;
+    public Vector3 originalPlayerPosition3D;
     public GameObject currentEnemyHit;
 
     [SerializeField] private CameraView cameraView;
@@ -46,7 +49,24 @@ public class GameManager : MonoBehaviour
         }
         //OTHER
         cameraView = GameObject.Find("MainCamera").GetComponent<CameraView>();
-        originalPlayerPosition = new Vector3(0, 0, 0);
+        originalPlayerPosition2D = new Vector2(0, 0);
+        originalPlayerPosition3D = new Vector3(0, 0, 0);
+
+        //Players
+        // Find and assign players
+        GameObject player2D = GameObject.Find("Player2D");
+        GameObject player3D = GameObject.Find("Player3D");
+
+        // Check if both players were found
+        if (player2D != null && player3D != null)
+        {
+            players[0] = player2D;
+            players[1] = player3D;
+        }
+        else
+        {
+            Debug.LogError("One or more players not found!");
+        }
     }
 
     // Update is called once per frame
@@ -58,8 +78,8 @@ public class GameManager : MonoBehaviour
     public IEnumerator ScreenAnimation_BattleZone(Vector3 spawnPoint)
     {
         //Obtain player position for going back
-        GameObject player = GameObject.Find("Player");
-        originalPlayerPosition = player.transform.position;
+        originalPlayerPosition2D = players[0].transform.position;
+        originalPlayerPosition3D = players[1].transform.position;
 
         yield return StartCoroutine(ScreenAnimation(spawnPoint));
 
@@ -88,28 +108,21 @@ public class GameManager : MonoBehaviour
 
     IEnumerator PlayerInvisibility()
     {
-        GameObject player = GameObject.Find("Player");
-
-        //disable player collider
-        player.transform.Find("Trigger2D").GetComponent<BoxCollider2D>().enabled = false;
-        player.transform.Find("Trigger").GetComponent<BoxCollider>().enabled = false;
-
         //resume player movement
         finishBattleScreenAnimation = true;
-        player.GetComponent<PlayerMovement>().StopPlayer(false);
+        players[0].GetComponent<PlayerMovement>().StopPlayer(false);
+        players[1].GetComponent<PlayerMovement>().StopPlayer(false);
 
         //Player invisibility color change
         for (int i = 0; i < 10; i++)
         {
-            player.GetComponent<SpriteRenderer>().color = Color.grey;
+            players[0].GetComponent<SpriteRenderer>().color = Color.grey;
+            players[1].GetComponent<SpriteRenderer>().color = Color.grey;
             yield return new WaitForSeconds(0.15f);
-            player.GetComponent<SpriteRenderer>().color = Color.white;
+            players[0].GetComponent<SpriteRenderer>().color = Color.white;
+            players[1].GetComponent<SpriteRenderer>().color = Color.white;
             yield return new WaitForSeconds(0.15f);
         }
-
-        //enable player collider
-        player.transform.Find("Trigger2D").GetComponent<BoxCollider2D>().enabled = true;
-        player.transform.Find("Trigger").GetComponent<BoxCollider>().enabled = true;
 
         yield return null;
     }
@@ -161,8 +174,10 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         //Move player to battle zone
-        GameObject.Find("Player").transform.position = spawnPoint;
-        GameObject.Find("Player").GetComponent<PlayerMovement>().StopPlayer(true);
+        players[0].transform.position = spawnPoint;
+        players[0].GetComponent<PlayerMovement>().StopPlayer(true);
+        players[1].transform.position = spawnPoint;
+        players[1].GetComponent<PlayerMovement>().StopPlayer(true);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -212,8 +227,8 @@ public class GameManager : MonoBehaviour
     private IEnumerator playerDeath()
     {
         //Stop player movement and camera
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        player.GetComponent<PlayerMovement>().StopPlayer(true);
+        players[0].GetComponent<PlayerMovement>().StopPlayer(true);
+        players[1].GetComponent<PlayerMovement>().StopPlayer(true);
         finishBattleScreenAnimation = false;
 
         //Enable canvas battlezone to show defeat message
@@ -246,8 +261,8 @@ public class GameManager : MonoBehaviour
     {
         //initiate combat
         Debug.Log("BattleZone - Fight");
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        player.GetComponent<PlayerMovement>().StopPlayer(false);
+        players[0].GetComponent<PlayerMovement>().StopPlayer(false);
+        players[1].GetComponent<PlayerMovement>().StopPlayer(false);
         canvas_battlezone.SetActive(false);
     }
 
@@ -257,8 +272,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("BattleZone - Heal");
         changeLives(true);
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        player.GetComponent<PlayerMovement>().StopPlayer(false);
+        players[0].GetComponent<PlayerMovement>().StopPlayer(false);
+        players[1].GetComponent<PlayerMovement>().StopPlayer(false);
         canvas_battlezone.SetActive(false);
     }
 

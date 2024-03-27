@@ -31,7 +31,7 @@ public class PlayerAttack : MonoBehaviour
 
         if (timeUntilMelee <= 0)
         {
-            if (Input.GetKeyDown(KeyCode.C)) 
+            if (this.gameObject == gameManager.currentPlayerInControl && Input.GetKeyDown(KeyCode.C)) 
             {
                 anim.SetTrigger("attack");
                 timeUntilMelee = meleeSpeed;
@@ -73,7 +73,7 @@ public class PlayerAttack : MonoBehaviour
             enemy.GetComponent<EnemyMovement>().ReturnToInitialPosition();
         }
 
-        StartCoroutine(gameManager.ScreenAnimation_Home(gameManager.originalPlayerPosition));
+        StartCoroutine(gameManager.ScreenAnimation_Home(gameManager.originalPlayerPosition3D));
 
         yield return null;
     }
