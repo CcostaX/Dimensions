@@ -102,7 +102,6 @@ public class PlayerMovement : MonoBehaviour
                 transform.Translate(normalizedDirection.x * moveSpeed * Time.deltaTime, normalizedDirection.y * moveSpeed * Time.deltaTime, 0);
             }
         }
-
     }
 
     private void OnAnimatorMove()
@@ -139,7 +138,8 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            animator.SetInteger("direction", -1);
+            if (this.gameObject == gameManager.currentPlayerInControl)
+                animator.SetInteger("direction", -1);
         }
     }
 
@@ -215,12 +215,15 @@ public class PlayerMovement : MonoBehaviour
         float time = 0f;
         if (!cameraView.isDimension2D)
         {
-            while (time < 1f)
+            if (rb != null)
             {
-                float jumpVelocity = Mathf.Lerp(0, jumpForce, time);
-                rb.velocity = new Vector3(0, 0, jumpVelocity);
-                time += Time.deltaTime * 10f;
-                yield return null;
+                while (time < 1f)
+                {
+                    float jumpVelocity = Mathf.Lerp(0, jumpForce, time);
+                    rb.velocity = new Vector3(0, 0, jumpVelocity);
+                    time += Time.deltaTime * 10f;
+                    yield return null;
+                }
             }
         }
     }
