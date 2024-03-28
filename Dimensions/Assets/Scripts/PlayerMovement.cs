@@ -7,7 +7,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     public GameObject currentSpawnPoint;
 
-    public bool isPlayerDimension2D;    
+    public bool isPlayerDimension2D;
+    public bool isTouchingFloor = false;
     public float moveSpeed = 5f;
     private Rigidbody2D rb2D;
     private Rigidbody rb;
@@ -74,12 +75,12 @@ public class PlayerMovement : MonoBehaviour
         moveDirection = new Vector2(moveX, moveY);
         moveDirection3D = new Vector3(moveX, moveY, 0);
 
-        if (Input.GetKeyDown(KeyCode.X) && canDash) //Dash
+        if (this.gameObject == gameManager.currentPlayerInControl && Input.GetKeyDown(KeyCode.X) && canDash) //Dash
         {
             StartCoroutine(Dash(moveDirection));
         }
 
-        if (Input.GetKeyDown(KeyCode.Z) && canJump) //Jump
+        if (this.gameObject == gameManager.currentPlayerInControl && Input.GetKeyDown(KeyCode.Z) && canJump) //Jump
         {
             StartCoroutine(Jump());
         }
@@ -226,6 +227,8 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
+        yield return new WaitForSeconds(0.5f);
+        canJump = true;
     }
 
 
@@ -248,7 +251,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        LayerMask groundLayerMask = LayerMask.GetMask("Object3D");
+        /*LayerMask groundLayerMask = LayerMask.GetMask("Object3D");
         RaycastHit hit;
         Vector3 raycastOrigin = transform.position + Vector3.up * 0.2f;
         if (Physics.Raycast(raycastOrigin, transform.forward, out hit, groundLayerMask))
@@ -261,10 +264,23 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.tag == "Floor")
         {
             canJump = true;
-        }
+        }*/
         if (collision.gameObject.layer == 9) //Layer = Spikes
         {
             transform.position = currentSpawnPoint.transform.position;
+        }
+
+        if (collision.gameObject.tag == "Floor")
+        {
+            isTouchingFloor = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            isTouchingFloor = false;
         }
     }
 
@@ -273,6 +289,25 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.layer == 9) //Layer = Spikes
         {
             transform.position = currentSpawnPoint.transform.position;
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Object3D")
+        {
+            transform.parent = other.transform;
+
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+
+        if (other.gameObject.tag == "Object3D")
+        {
+            transform.parent = null;
+
         }
     }
 }

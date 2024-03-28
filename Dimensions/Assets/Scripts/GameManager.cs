@@ -74,17 +74,22 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Move Circle in player position (and always stay on ground)
         if (currentPlayerInControl == players[0])
             currentPlayerCircle.transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, players[0].transform.position.z);
         else if (currentPlayerInControl == players[1])
         {
-            if (players[1].GetComponent<PlayerMovement>().canJump)
+            if (players[1].GetComponent<PlayerMovement>().canJump && players[1].GetComponent<PlayerMovement>().isTouchingFloor)
             {
                 CirclePositionZ = players[1].transform.position.z;
                 currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y-0.5f, players[1].transform.position.z);
             }
             else
-                currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y-0.5f, CirclePositionZ);
+            {
+                currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y - 0.5f, CirclePositionZ);
+                players[0].transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, CirclePositionZ);
+            }
+
         }
   
     }
