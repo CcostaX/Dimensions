@@ -70,3 +70,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/Cartoon_Texture_Pack/
+/Dimensions/Assets/Cartoon_Texture_Pack
+/Dimensions/Assets/Handpainted_Grass_and_Ground_Textures
+/Dimensions/Assets/Import
