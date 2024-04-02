@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public Vector2 originalPlayerPosition2D;
     public Vector3 originalPlayerPosition3D;
     public GameObject currentEnemyHit;
+    private Color color;
 
     [SerializeField] private CameraView cameraView;
     // Start is called before the first frame update
@@ -76,7 +77,11 @@ public class GameManager : MonoBehaviour
     {
         //Move Circle in player position (and always stay on ground)
         if (currentPlayerInControl == players[0])
+        {
             currentPlayerCircle.transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, players[0].transform.position.z);
+            if (ColorUtility.TryParseHtmlString("#006600", out color))
+                currentPlayerCircle.GetComponent<SpriteRenderer>().color = color;
+        }
         else if (currentPlayerInControl == players[1])
         {
             if (players[1].GetComponent<PlayerMovement>().canJump && players[1].GetComponent<PlayerMovement>().isTouchingFloor)
@@ -89,7 +94,8 @@ public class GameManager : MonoBehaviour
                 currentPlayerCircle.transform.position = new Vector3(players[1].transform.position.x, players[1].transform.position.y - 0.5f, CirclePositionZ);
                 players[0].transform.position = new Vector3(players[0].transform.position.x, players[0].transform.position.y, CirclePositionZ);
             }
-
+            if (ColorUtility.TryParseHtmlString("#003366", out color))
+                currentPlayerCircle.GetComponent<SpriteRenderer>().color = color;
         }
   
     }

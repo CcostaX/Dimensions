@@ -5,15 +5,12 @@ using UnityEngine.Events;
 
 public class ButtonScript : MonoBehaviour
 {
-    public GameObject button;
+    public GameObject buttonPress;
     AudioSource sound;
     public bool isPressed = false;
     [SerializeField] private GameObject door;
     [SerializeField] private int currentRoom = -1;
     private GameManager gameManager;
-
-    [Header("2D Settings")]
-    [SerializeField] private GameObject press;
 
     // Start is called before the first frame update
     void Start()
@@ -28,7 +25,7 @@ public class ButtonScript : MonoBehaviour
         if (!isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object3D"))
         {
             //transform pressed button to simulate press on button
-            button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, 0.07f);
+            buttonPress.transform.localPosition = new Vector3(buttonPress.transform.localPosition.x, buttonPress.transform.localPosition.y, 0.07f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 0.07f);
             verifyPressedButtons();
         }
@@ -38,7 +35,7 @@ public class ButtonScript : MonoBehaviour
     {
         if (isPressed && (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Object3D"))
         {
-            button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y, -0.05f);
+            buttonPress.transform.localPosition = new Vector3(buttonPress.transform.localPosition.x, buttonPress.transform.localPosition.y, -0.05f);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, -0.05f);
             isPressed = false;
         }
@@ -51,9 +48,9 @@ public class ButtonScript : MonoBehaviour
         {
             //Change press color
             Color newColor;
-            if (ColorUtility.TryParseHtmlString("#990000", out newColor)) //dark red
+            if (ColorUtility.TryParseHtmlString("#3A792E", out newColor)) //dark green
             {
-                SpriteRenderer rendererComponent = press.GetComponent<SpriteRenderer>();
+                SpriteRenderer rendererComponent = buttonPress.GetComponent<SpriteRenderer>();
                 if (rendererComponent != null)
                 {
                     rendererComponent.material.color = newColor;
@@ -70,9 +67,9 @@ public class ButtonScript : MonoBehaviour
         {
             //Change press color
             Color newColor;
-            if (door.activeSelf && ColorUtility.TryParseHtmlString("#ff0000", out newColor)) //red
+            if (door.activeSelf && ColorUtility.TryParseHtmlString("#8BFF77", out newColor)) //green
             {
-                SpriteRenderer rendererComponent = press.GetComponent<SpriteRenderer>();
+                SpriteRenderer rendererComponent = buttonPress.GetComponent<SpriteRenderer>();
                 if (rendererComponent != null)
                 {
                     rendererComponent.material.color = newColor;
