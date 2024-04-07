@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEngine.Windows;
 
 public class CurrentRoom : MonoBehaviour
 {
@@ -29,6 +31,25 @@ public class CurrentRoom : MonoBehaviour
             collision.gameObject.GetComponent<PlayerMovement>().currentSpawnPoint = spawnPoint;
             if (currentRoom >= 0)
                 gameManager.currentRoomPosition = spawnPoint;
+
+            //Hide rooms for more performance
+            GameObject[] rooms = GameObject.FindGameObjectsWithTag("Rooms");
+            foreach (GameObject room in rooms)
+            {
+                string roomNumber = room.name.Substring(room.name.Length - 1);
+                int result;
+                if (int.TryParse(roomNumber, out result))
+                {
+                    if (result < currentRoom - 1 || result > currentRoom + 1)
+                    {
+                        room.SetActive(false);
+                    }
+                    else
+                    {
+                        room.SetActive(true);
+                    }
+                }
+            }
         }
     }
 
