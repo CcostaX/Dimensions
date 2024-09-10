@@ -5,8 +5,8 @@ This personal project aims to explore a novel concept by combining 2D and 3D ele
 Solve puzzles, defeat enemies, and explore a world that blends 2D and 3D spaces seamlessly.
 
 
-Itch.io: https://ccostax.itch.io/dimensions
-My portfolio: https://ccostax.github.io
+- Itch.io: https://ccostax.itch.io/dimensions
+- My portfolio: https://ccostax.github.io
 
 ## Key Features
 
@@ -27,9 +27,9 @@ Each character can only move objects of a specific color:
 
 ## Images
 
-![Game Screenshot 1](./images/dimensions1.png)
-![Game Screenshot 2](./images/dimensions2.png)
-![Game Screenshot 3](./images/dimensions3.png)
+![Game Screenshot 1](./dimensions1.png)
+![Game Screenshot 2](./dimensions2.png)
+![Game Screenshot 3](./dimensions3.png)
 
 
 Feel free to contribute or provide feedback!
